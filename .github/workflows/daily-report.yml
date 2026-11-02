@@ -1,0 +1,104 @@
+name: 每日战报生成
+
+on:
+  schedule:
+    # ⚠️ GitHub 的 cron 一律按 UTC 算，比北京慢 8 小时
+    # UTC 07:30 = 北京 15:30（首拉：当天所有比赛约 13:30 前打完，留 2 小时缓冲）
+    - cron: "30 7 * * *"
+    # UTC 08:40 = 北京 16:40（补拉：兜住三加时这种打到 15 点还没完的极端情况）
+    - cron: "40 8 * * *"
+  workflow_dispatch:
+    inputs:
+      game_date:
+        description: "比赛日 YYYY-MM-DD（美国时间），留空则自动取北京时间昨天"
+        required: false
+        default: ""
+
+# 手动触发和定时触发撞在一起时，后来的排队等前面的跑完，不会同时改 docs/
+concurrency:
+  group: daily-report
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TZ: Asia/Shanghai
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 配置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 数据来自 ESPN 公开接口，不需要任何 Key。
+      # BALLDONTLIE_API_KEY 只是 ESPN 万一改接口时的比分兜底，没配也能跑。
+      - name: 生成战报
+        env:
+          REPORT_GAME_DATE: ${{ inputs.game_date }}
+          BALLDONTLIE_API_KEY: ${{ secrets.BALLDONTLIE_API_KEY }}
+        run: |
+          echo "运行时间：$(date '+%Y-%m-%d %H:%M %Z')"
+          python scripts/fetch_nba.py
+
+      - name: 写运行摘要
+        if: always()
+        run: |
+          python - <<'PY' >> $GITHUB_STEP_SUMMARY
+          import json, pathlib
+          p = pathlib.Path("docs/latest.json")
+          if not p.exists():
+              print("### ⚠️ 没有产出 latest.json，脚本可能中途失败\n")
+              print("去看上面的「生成战报」步骤日志。")
+              raise SystemExit
+          d = json.loads(p.read_text(encoding="utf-8"))
+          print(f"### 每日战报 · {d['game_date']}（美国时间）\n")
+          print(f"- 生成时间：{d['generated_at']}")
+          print(f"- 完场场次：{d.get('total_games', 0)} 场")
+          if d.get("headline"):
+              print(f"- 今日最胶着：{d['headline']}")
+          t = d.get("tomorrow") or {}
+          if t.get("status") == "play" and t.get("pick"):
+              pk = t["pick"]
+              print(f"- 明日焦点：{pk.get('away')} @ {pk.get('home')}（{pk.get('bj_date')} {pk.get('bj_time')}）")
+          elif t.get("status") == "idle":
+              print(f"- 明日休战，下一比赛日 {t.get('date_cn')}")
+          print("\n→ 成品：`docs/report.html`")
+          PY
+
+      - name: 归档产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-report-${{ github.run_number }}
+          path: docs/
+          retention-days: 30
+
+      - name: 回写仓库
+        run: |
+          git config user.name "nba-report-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add docs/
+          if git diff --staged --quiet; then
+            echo "无变化，跳过提交"
+            exit 0
+          fi
+          git commit -m "战报：$(date '+%Y-%m-%d') 自动生成"
+          # 万一同期有人在网页端改过文件，直接 push 会被拒；rebase 一次再推
+          for i in 1 2 3; do
+            if git push; then
+              echo "推送成功"
+              exit 0
+            fi
+            echo "第 $i 次推送失败，拉取远端后重试"
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+            sleep 3
+          done
+          echo "连续三次推送失败，请手动检查仓库状态"
+          exit 1

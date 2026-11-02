@@ -1,0 +1,44 @@
+[
+  {
+    "en": "Stephen Curry",
+    "cn": "库里",
+    "team": "Golden State Warriors",
+    "team_cn": "勇士"
+  },
+  {
+    "en": "Luka Doncic",
+    "cn": "东契奇",
+    "team": "Los Angeles Lakers",
+    "team_cn": "湖人"
+  },
+  {
+    "en": "LeBron James",
+    "cn": "詹姆斯",
+    "team": "Philadelphia 76ers",
+    "team_cn": "76人"
+  },
+  {
+    "en": "Joel Embiid",
+    "cn": "恩比德",
+    "team": "Philadelphia 76ers",
+    "team_cn": "76人"
+  },
+  {
+    "en": "Kevin Durant",
+    "cn": "杜兰特",
+    "team": "Houston Rockets",
+    "team_cn": "火箭"
+  },
+  {
+    "en": "Victor Wembanyama",
+    "cn": "文班亚马",
+    "team": "San Antonio Spurs",
+    "team_cn": "马刺"
+  },
+  {
+    "en": "Yang Hansen",
+    "cn": "杨瀚森",
+    "team": "Portland Trail Blazers",
+    "team_cn": "开拓者"
+  }
+]

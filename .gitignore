@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 本地临时验证脚本
+.tmp_*
+
+# WorkBuddy 项目记忆与缓存（不影响构建，也没必要进仓库）
+.workbuddy/
+
+# 系统垃圾
+.DS_Store
+Thumbs.db
+desktop.ini

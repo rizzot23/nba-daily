@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>篮球每日战报 · 公众号运营方案 v1.0</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 48px 24px 80px;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #fafaf9; color: #1c1917;
+    line-height: 1.7; font-size: 15px;
+  }
+  .wrap { max-width: 840px; margin: 0 auto; }
+  .doc-title { font-size: 30px; font-weight: 500; margin: 0 0 6px; letter-spacing: -0.3px; }
+  .doc-sub { color: #78716c; font-size: 14px; margin: 0 0 16px; }
+  .badge {
+    display: inline-block; background: #e1f5ee; color: #0f6e56;
+    font-size: 12px; padding: 3px 9px; border-radius: 4px; margin-bottom: 40px;
+  }
+  h2 {
+    font-size: 19px; font-weight: 500; margin: 44px 0 16px;
+    padding-bottom: 10px; border-bottom: 1px solid #e7e5e4;
+  }
+  h3 { font-size: 15px; font-weight: 500; margin: 26px 0 10px; color: #292524; }
+  p { margin: 0 0 14px; }
+  ul, ol { margin: 0 0 16px; padding-left: 22px; }
+  li { margin-bottom: 8px; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    background: #f5f5f4; padding: 1px 5px; border-radius: 4px; font-size: 13px;
+  }
+  .note {
+    border-left: 3px solid #185fa5; background: #e6f1fb;
+    padding: 16px 20px; border-radius: 4px; margin: 0 0 24px;
+  }
+  .warn {
+    border-left: 3px solid #ba7517; background: #faeeda;
+    padding: 16px 20px; border-radius: 4px; margin: 0 0 24px;
+  }
+  .note p:last-child, .warn p:last-child { margin-bottom: 0; }
+  table {
+    width: 100%; border-collapse: collapse; margin: 0 0 20px;
+    font-size: 14px; table-layout: fixed;
+  }
+  th {
+    text-align: left; font-weight: 500; padding: 10px 12px;
+    background: #f5f5f4; border-bottom: 1px solid #e7e5e4; color: #44403c;
+  }
+  td { padding: 10px 12px; border-bottom: 1px solid #f0efed; vertical-align: top; }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 0 0 24px; }
+  .card { background: #fff; border: 1px solid #e7e5e4; border-radius: 10px; padding: 18px 20px; }
+  .card h4 { margin: 0 0 4px; font-size: 15px; font-weight: 500; }
+  .card .tag { font-size: 12px; color: #a8a29e; display: block; margin-bottom: 12px; }
+  .card ul { margin: 0; padding-left: 18px; font-size: 14px; }
+  .card li { margin-bottom: 6px; }
+  .red { color: #a32d2d; }
+  .green { color: #3b6d11; }
+  .amber { color: #854f0b; }
+  .timeline { margin: 0 0 24px; }
+  .tl-item { display: flex; gap: 16px; padding-bottom: 20px; position: relative; }
+  .tl-time {
+    flex: 0 0 62px; font-family: ui-monospace, monospace; font-size: 13px;
+    color: #78716c; padding-top: 1px;
+  }
+  .tl-body { flex: 1; border-left: 2px solid #e7e5e4; padding-left: 18px; padding-bottom: 4px; }
+  .tl-body strong { display: block; font-weight: 500; margin-bottom: 2px; }
+  .tl-body span { color: #57534e; font-size: 14px; }
+  .formula {
+    background: #fff; border: 1px solid #e7e5e4; border-radius: 8px;
+    padding: 14px 18px; margin-bottom: 12px;
+  }
+  .formula .label { font-size: 12px; color: #a8a29e; margin-bottom: 5px; }
+  .formula .q { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+  .formula .why { font-size: 13px; color: #57534e; }
+  .footer { color: #a8a29e; font-size: 13px; margin-top: 48px; }
+  .divider { height: 1px; background: #e7e5e4; margin: 40px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1 class="doc-title">篮球每日战报 · 公众号运营方案</h1>
+  <p class="doc-sub">v1.0 ｜ 个人订阅号 ｜ 2026-11-02</p>
+  <span class="badge">替代 v0.1 小程序方案</span>
+
+  <div class="note">
+    <p><strong>为什么这个方向对：</strong>订阅号每天可群发 1 次、每次最多 8 篇，正好对应"每天一份战报"的节奏；个人身份即可注册，无需营业执照、无需开发、无需小程序类目审核；体育内容不属于《互联网新闻信息服务管理规定》所称的新闻信息，个人号无需新闻许可。</p>
+    <p><strong>但要正视代价：</strong>订阅号消息折叠在二级入口，打开率普遍 2–8%。推送一定送得到，但不一定被点开。所以产品的成败从"能不能推"变成了"标题能不能让人点"。</p>
+  </div>
+
+  <h2>1. 账号设置</h2>
+
+  <table>
+    <tr><th style="width: 22%;">项目</th><th style="width: 30%;">建议</th><th>说明</th></tr>
+    <tr>
+      <td>账号类型</td>
+      <td>个人订阅号</td>
+      <td>个人主体唯一选择（服务号需营业执照，且每月仅 4 次群发，撑不起日更）。</td>
+    </tr>
+    <tr>
+      <td>名称</td>
+      <td>今日篮坛 / 篮球日报 / 每晚一球</td>
+      <td>避开 "NBA" 字样。名称一经确定，个人号一年仅可改一次。</td>
+    </tr>
+    <tr>
+      <td>功能介绍</td>
+      <td>"每天比赛结束后，一份 3 分钟读完的战报"</td>
+      <td>把"每天"和"3 分钟"写进简介，这是用户决定关注的理由。</td>
+    </tr>
+    <tr>
+      <td>头像</td>
+      <td>自绘抽象篮球图形或纯文字标识</td>
+      <td>不使用联盟、球队任何元素。固定主色，形成识别度。</td>
+    </tr>
+    <tr>
+      <td>菜单</td>
+      <td>今日战报 / 往期归档 / 关于</td>
+      <td>往期归档跳"合集"页面，这是长期价值的载体。</td>
+    </tr>
+  </table>
+
+  <h2>2. 每日发布 SOP</h2>
+
+  <p>先定义清楚"今日"：<strong>按美国比赛日组织——北京时间当日 0:00 至 14:30 之间结束的所有比赛</strong>。这个区间覆盖了从凌晨的周末下午场到西部晚场的全部场次，写进"关于"页面，避免用户混淆。</p>
+
+  <p>时间依据：东部主场 19:30 开打折合北京时间 08:30（冬令时），一场球实际耗时约 2 小时 15 分，11:00 前后结束；西部主场晚场 11:30 才开打，13:45–14:00 收尾；TNT 双赛日的第二场最晚约 14:30。夏令时期间整体提前 1 小时，14:30 仍是安全上限。</p>
+
+  <p>这意味着 <strong>14:30 之后当天已无新比赛</strong>，到 17:30 群发有 3 小时缓冲——写稿时间从不紧张，紧张的是"今天写什么"的判断。</p>
+
+  <p><strong>发布时间定为 17:30</strong>，理由不是"比赛刚结束"，而是下班通勤正是刷手机的高峰。代价是那会儿你可能还在路上：草稿必须在 17:00 前后于电脑上排好版，手机上用「订阅号助手」完成最后的群发。这条流程建议先实际走通一次。</p>
+
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-time">15:30</div>
+      <div class="tl-body">
+        <strong>自动生成</strong>
+        <span>GitHub Actions 拉取当日全部比赛，聚合球员数据，排版成 HTML 并提交到仓库。</span>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-time">16:30</div>
+      <div class="tl-body">
+        <strong>改导语</strong>
+        <span>打开生成好的页面，把那 120 字换成"今天最值得说的一件事"。这是唯一无法自动化的部分。</span>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-time">17:00</div>
+      <div class="tl-body">
+        <strong>粘贴进编辑器</strong>
+        <span>全选复制 → 粘到公众号编辑器（样式内联，能保留排版）→ 配封面 → 定标题。</span>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-time">17:15</div>
+      <div class="tl-body">
+        <strong>定标题 + 二维码</strong>
+        <span>标题至少写 5 个备选，选最有信息量的那个。封面套固定模板。</span>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-time">17:30</div>
+      <div class="tl-body">
+        <strong>群发</strong>
+        <span>下班通勤刷手机的高峰。发出后 20 字以内可改，其余不可改。</span>
+      </div>
+    </div>
+  </div>
+
+  <p>时间预算控制在 <strong>30 分钟内</strong>（脚本已经把排版做完了）。超过 45 分钟就说明导语写不出来——那说明今天没看球，而不是流程有问题。</p>
+
+  <h2>3. 每期结构：一次群发挂几篇</h2>
+
+  <p>8 篇是上限，不是目标。多数期次 <strong>1–2 篇</strong>就够，塞满会稀释头条。</p>
+
+  <table>
+    <tr><th style="width: 18%;">位置</th><th style="width: 30%;">内容</th><th>作用</th></tr>
+    <tr>
+      <td>头条</td>
+      <td>今日战报总览：导语 + 逐场卡片 + 一句话点评</td>
+      <td>这是产品本体。用户只点这一篇也应该满足。</td>
+    </tr>
+    <tr>
+      <td>次条（可选）</td>
+      <td>当日最有看点的单场深度：关键回合、数据拆解</td>
+      <td>给重度球迷的加餐，也是被转发最多的内容。</td>
+    </tr>
+    <tr>
+      <td>不推送</td>
+      <td>单场速报、数据榜单</td>
+      <td>走"发布"而非"群发"，不占额度，进合集沉淀。</td>
+    </tr>
+  </table>
+
+  <div class="warn">
+    <p><strong>"发布"和"群发"别搞混。</strong>后台两个按钮：<strong>群发</strong>会推送到粉丝，占每天那 1 次额度；<strong>发布</strong>只进公众号主页、历史消息和搜一搜，<strong>不占次数、不推送</strong>。很多人点了"发布"以为发出去了，等半天没阅读——内容只是躺在自己后台。给读者看的，永远用群发。</p>
+  </div>
+
+  <h2>4. 标题：决定成败的唯一变量</h2>
+
+  <p>订阅号折叠之后，标题是用户唯一能看到的信号。封面图是第二信号，正文排版根本不参与"点不点"的决策。所以标题值得花 20 分钟，比排版值得多。</p>
+
+  <div class="formula">
+    <div class="label">结论型 · 最稳</div>
+    <div class="q">雷霆赢了，但问题比输球更明显</div>
+    <div class="why">先给结论再制造反差。适合你确实看出门道的那一期。</div>
+  </div>
+
+  <div class="formula">
+    <div class="label">数字型 · 适合场次多的日子</div>
+    <div class="q">今天 9 场，只有一场值得熬夜</div>
+    <div class="why">数字建立"信息量"预期，后半句制造筛选感，点击动机强。</div>
+  </div>
+
+  <div class="formula">
+    <div class="label">细节型 · 最像人写的</div>
+    <div class="q">最后 2.1 秒，他为什么没叫暂停</div>
+    <div class="why">把一场球压缩成一个具体疑问。比"XX 绝杀 XX"高级得多。</div>
+  </div>
+
+  <div class="formula">
+    <div class="label">服务型 · 适合平淡的日子</div>
+    <div class="q">今天 8 场战报，3 分钟看完</div>
+    <div class="why">承认今天没大事，转而卖"效率"。诚实反而建立信任。</div>
+  </div>
+
+  <p><strong>要避开的写法：</strong>"震惊""炸裂""彻底疯了"这类夸张词短期能骗点击，长期会把这个号变成用户眼里的噪音源。你的核心资产是"每天值得花 3 分钟"的确定性，标题党会直接摧毁它。</p>
+
+  <h2>5. 排版规范</h2>
+
+  <div class="card-grid">
+    <div class="card">
+      <h4>文字</h4>
+      <span class="tag">移动端优先</span>
+      <ul>
+        <li>正文字号 15–16px，行距 1.75</li>
+        <li>段间距 1.5 倍行高，别用空行硬撑</li>
+        <li>每段不超过 3 行，手机屏一行约 18 字</li>
+        <li>全文字色只用 1 种深灰（#3f3f46），强调色最多 1 种</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>比分卡片</h4>
+      <span class="tag">已由脚本自动生成</span>
+      <ul>
+        <li>队名右侧对齐、比分居中、胜方加粗加深</li>
+        <li>样式全部内联，可直接复制粘贴</li>
+        <li>不用每次重排，也不用手动做表</li>
+        <li>格式永远一致，形成识别度</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>图片</h4>
+      <span class="tag">版权红线区</span>
+      <ul>
+        <li class="red">不用比赛截图、球员照片、球队 logo</li>
+        <li>封面用纯色块 + 大字标题，自己生成</li>
+        <li>数据图自己画，别截别人的</li>
+        <li>文末统一放一句来源与免责声明</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>6. 合规清单</h2>
+
+  <table>
+    <tr><th style="width: 26%;">事项</th><th style="width: 18%;">结论</th><th>说明</th></tr>
+    <tr>
+      <td>体育内容是否需要新闻许可</td>
+      <td class="green">不需要</td>
+      <td>《互联网新闻信息服务管理规定》界定的新闻信息仅含政治、经济、军事、外交等社会公共事务及突发事件。体育、娱乐不在其列。</td>
+    </tr>
+    <tr>
+      <td>比分与统计</td>
+      <td class="green">可用</td>
+      <td>事实数据。NBA 诉 Motorola 案确立比赛本身与事实数据不受版权保护。</td>
+    </tr>
+    <tr>
+      <td>自撰文字</td>
+      <td class="green">可用</td>
+      <td>基于公开事实的原创表达，著作权归你自己。</td>
+    </tr>
+    <tr>
+      <td>搬运媒体原文</td>
+      <td class="red">不可用</td>
+      <td>2021 年 CBA 数据案（贝泰科技诉雷速体育）已判定抓取官方数据服务商内容构成不正当竞争。</td>
+    </tr>
+    <tr>
+      <td>logo、图片、集锦</td>
+      <td class="red">不可用</td>
+      <td>商标权 + 肖像权 + 著作权三重风险。</td>
+    </tr>
+    <tr>
+      <td>广告与流量主</td>
+      <td class="amber">暂缓</td>
+      <td>腾讯体育持 NBA 中国独家数字媒体权益至 2027-28 赛季。不商业化属个人表达，商业化即在腾讯主场做竞品。</td>
+    </tr>
+  </table>
+
+  <p>每篇文末固定放：<em>"本文内容基于公开赛事数据独立撰写，与 NBA 及任何转播平台无关联。"</em></p>
+
+  <h2>7. 盯哪几个数</h2>
+
+  <table>
+    <tr><th style="width: 26%;">指标</th><th style="width: 22%;">及格线</th><th>含义与应对</th></tr>
+    <tr>
+      <td>打开率</td>
+      <td>≥ 8%</td>
+      <td>阅读人数 ÷ 送达人数。低于 5% 说明标题失效，先改标题不改进内容。</td>
+    </tr>
+    <tr>
+      <td>读完率</td>
+      <td>≥ 45%</td>
+      <td>在后台"图文分析"看。低说明开头 120 字导语没抓住人。</td>
+    </tr>
+    <tr>
+      <td>分享率</td>
+      <td>≥ 3%</td>
+      <td>订阅号最重要的增长来源。分享率高的期次，回头拆解它为什么被转。</td>
+    </tr>
+    <tr>
+      <td>取关率</td>
+      <td>≤ 1%</td>
+      <td>单期超过 2% 立即回查：是内容水了，还是标题骗人了。</td>
+    </tr>
+  </table>
+
+  <h2>8. 前 30 天冷启动</h2>
+
+  <div class="card-grid">
+    <div class="card">
+      <h4>第 1 周</h4>
+      <span class="tag">先跑通，不求人看</span>
+      <ul>
+        <li>连续发 7 期，不推广</li>
+        <li>目的是把 SOP 压进 60 分钟</li>
+        <li>确定排版模板，之后不再改</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>第 2 周</h4>
+      <span class="tag">找 20 个真实读者</span>
+      <ul>
+        <li>拉 20 个真球迷进群</li>
+        <li>每期发完问一句"哪段你跳过了"</li>
+        <li>这比任何数据都准</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>第 3–4 周</h4>
+      <span class="tag">验证留存</span>
+      <ul>
+        <li>看有没有人主动催更</li>
+        <li>看分享率是否稳定在 3% 以上</li>
+        <li>不达标就别急着推广</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <p><strong>这个方向最大的好处是把"技术风险"降到了零。</strong>不需要服务器、不需要审核类目、不需要维护代码。代价是所有的难度都转移到了同一件事上：<strong>每天能不能在 60 分钟内产出一份值得 3 分钟的内容</strong>。</p>
+
+  <p>这件事没有任何工具能替你完成。它决定了 30 天后还有多少人会在 21:00 点开你。</p>
+
+  <p class="footer">方案 v1.1 ｜ 已配套自动生成流水线（scripts/fetch_nba.py + GitHub Actions），产物见 docs/report.html ｜ 待确认：账号名称、头条写作风格</p>
+
+</div>
+</body>
+</html>

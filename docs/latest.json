@@ -1,0 +1,227 @@
+{
+  "game_date": "2026-11-01",
+  "generated_at": "2026-11-02T23:59:22+08:00",
+  "total_games": 4,
+  "headline": "凯尔特人 108-97 魔术",
+  "lead": "今天 4 场，最胶着的是凯尔特人 108-97 魔术：交替领先 5 次，打平 4 次，第 4 节还剩 3:59 才把分差拉开到 5 分以上。",
+  "focus": [
+    {
+      "cn": "东契奇",
+      "state": "played",
+      "team": "湖人",
+      "opp": "猛龙",
+      "result": "胜",
+      "pts": "45",
+      "reb": "15",
+      "ast": "6"
+    },
+    {
+      "cn": "库里",
+      "state": "dnp",
+      "team": "勇士",
+      "opp": "快船",
+      "result": "胜",
+      "pts": "",
+      "reb": "",
+      "ast": ""
+    },
+    {
+      "cn": "詹姆斯",
+      "state": "idle",
+      "team": "76人",
+      "opp": "",
+      "result": "",
+      "pts": "",
+      "reb": "",
+      "ast": ""
+    },
+    {
+      "cn": "恩比德",
+      "state": "idle",
+      "team": "76人",
+      "opp": "",
+      "result": "",
+      "pts": "",
+      "reb": "",
+      "ast": ""
+    },
+    {
+      "cn": "杜兰特",
+      "state": "idle",
+      "team": "火箭",
+      "opp": "",
+      "result": "",
+      "pts": "",
+      "reb": "",
+      "ast": ""
+    },
+    {
+      "cn": "文班亚马",
+      "state": "idle",
+      "team": "马刺",
+      "opp": "",
+      "result": "",
+      "pts": "",
+      "reb": "",
+      "ast": ""
+    },
+    {
+      "cn": "杨瀚森",
+      "state": "idle",
+      "team": "开拓者",
+      "opp": "",
+      "result": "",
+      "pts": "",
+      "reb": "",
+      "ast": ""
+    }
+  ],
+  "best_action": {
+    "player": "Sharpe",
+    "kind": "alley",
+    "dist_ft": null,
+    "period": 4,
+    "clock_sec": 359.0,
+    "game": "篮网 98-90 步行者"
+  },
+  "tomorrow": {
+    "date": "2026-11-02",
+    "date_cn": "11月2日（周一）",
+    "days_ahead": 1,
+    "total": 15,
+    "pick": {
+      "away": "雷霆",
+      "home": "骑士",
+      "away_record": "4-2",
+      "home_record": "4-2",
+      "bj_date": "11月3日",
+      "bj_time": "08:00",
+      "national": [
+        "NBCSN"
+      ],
+      "stars": [],
+      "facts": [
+        "NBCSN 全美直播",
+        "两队战绩咬在一起（4胜2负 / 4胜2负）"
+      ],
+      "score": 165.0
+    },
+    "watch": [
+      {
+        "away": "公牛",
+        "home": "76人",
+        "bj_date": "11月3日",
+        "bj_time": "08:30",
+        "national": [],
+        "core": true
+      },
+      {
+        "away": "凯尔特人",
+        "home": "火箭",
+        "bj_date": "11月3日",
+        "bj_time": "09:30",
+        "national": [],
+        "core": true
+      },
+      {
+        "away": "爵士",
+        "home": "马刺",
+        "bj_date": "11月3日",
+        "bj_time": "09:30",
+        "national": [],
+        "core": true
+      },
+      {
+        "away": "太阳",
+        "home": "勇士",
+        "bj_date": "11月3日",
+        "bj_time": "11:00",
+        "national": [],
+        "core": true
+      },
+      {
+        "away": "热火",
+        "home": "湖人",
+        "bj_date": "11月3日",
+        "bj_time": "11:00",
+        "national": [],
+        "core": true
+      },
+      {
+        "away": "开拓者",
+        "home": "掘金",
+        "bj_date": "11月3日",
+        "bj_time": "10:00",
+        "national": [],
+        "core": false
+      }
+    ],
+    "status": "play"
+  },
+  "games": [
+    {
+      "away": "凯尔特人",
+      "home": "魔术",
+      "away_score": 108,
+      "home_score": 97,
+      "label": "今日最胶着",
+      "hook": "凯尔特人最多领先 15 分，最终赢 11 分。",
+      "drama": {
+        "lead_changes": 5,
+        "ties": 4,
+        "comeback": 9,
+        "close_seconds_q4": 190,
+        "score": 58.6,
+        "clutch": null
+      }
+    },
+    {
+      "away": "篮网",
+      "home": "步行者",
+      "away_score": 98,
+      "home_score": 90,
+      "label": null,
+      "hook": "篮网最多领先 12 分，最终赢 8 分。",
+      "drama": {
+        "lead_changes": 4,
+        "ties": 1,
+        "comeback": 1,
+        "close_seconds_q4": 15,
+        "score": 39.8,
+        "clutch": null
+      }
+    },
+    {
+      "away": "快船",
+      "home": "勇士",
+      "away_score": 112,
+      "home_score": 124,
+      "label": "今日最大逆转",
+      "hook": "勇士一度落后 11 分，翻盘赢 12 分。",
+      "drama": {
+        "lead_changes": 7,
+        "ties": 3,
+        "comeback": 11,
+        "close_seconds_q4": 0,
+        "score": 51.0,
+        "clutch": null
+      }
+    },
+    {
+      "away": "猛龙",
+      "home": "湖人",
+      "away_score": 125,
+      "home_score": 131,
+      "label": "今日最功亏一篑",
+      "hook": "猛龙末节打出 43-27，但前面落后太多，最终仍差 6 分。",
+      "drama": {
+        "lead_changes": 1,
+        "ties": 1,
+        "comeback": 5,
+        "close_seconds_q4": 7,
+        "score": 21.4,
+        "clutch": null
+      }
+    }
+  ]
+}
