@@ -4,7 +4,7 @@
 不画球、不画线，只用得意黑排字。两个件：
 
   字标  去球吧 三字等大紧排，墨色，透明底 —— 用在封面、页眉插图、文末署名
-  头像  黄圆 + 「球吧」两字，墨色 —— 账号头像
+  头像  篮球皮色圆 + 「球吧」两字，墨色 —— 账号头像
 
 为什么头像只用两个字而不是三个：
   公众号列表里头像约 48px。圆内接正方形的边长只有直径的 0.707，
@@ -25,7 +25,11 @@ OUT = ROOT / "out4"
 OUT.mkdir(exist_ok=True)
 
 FONT = str(ROOT / "fonts" / "SmileySans-Oblique.ttf")
-YEL = (238, 205, 19)
+# 头像底色：篮球皮色，偏浅一档。
+# 取样自 reference2.png 的球体（206,126,73），往亮里提了约 5%，才不至于闷成巧克力棕。
+# 原先用黄 (238,205,19)：信息流里更跳，但黄色和"篮球"没关系，只能当记号；
+# 这个棕是它自己的颜色，代价是亮度掉了，在深色模式列表里没有黄那么扎眼。
+LEATHER = (217, 146, 90)
 INK = (22, 19, 27)
 WHT = (245, 244, 214)
 GRAY = (138, 138, 138)
@@ -55,8 +59,8 @@ def word(chars, size, fill, gaps=GAPS):
     return im.crop(im.getbbox())
 
 
-def avatar(size=640, bg=YEL, fg=INK):
-    """黄圆 + 「球吧」，按圆内接缩放"""
+def avatar(size=640, bg=LEATHER, fg=INK):
+    """圆底 + 「球吧」，按圆内接缩放"""
     SS = 4
     big = size * SS
     im = Image.new("RGBA", (big, big), (0, 0, 0, 0))
@@ -126,7 +130,7 @@ def assemble_header():
 def main():
     for s in (640, 320, 160, 128, 96, 64, 48, 32):
         avatar(s).save(OUT / f"v4-avatar-{s}.png")
-    avatar(640, bg=INK, fg=YEL).save(OUT / "v4-avatar-reverse-640.png")
+    avatar(640, bg=INK, fg=LEATHER).save(OUT / "v4-avatar-reverse-640.png")
     avatar(640, bg=INK, fg=WHT).save(OUT / "v4-avatar-mono-640.png")
 
     for h in (640, 320, 160, 80):
