@@ -1883,13 +1883,13 @@ def render_page(games, game_date, display_date, tomorrow=None):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{esc(display_date)} 战报</title>
+<title>去球吧 · {esc(display_date)} 战报</title>
 </head>
 <body style="margin:0;padding:0;background:#fafafa;">
 
 <div style="max-width:640px;margin:0 auto;padding:30px 20px 44px;background:#ffffff;font-family:{FONT};">
 
-  <div style="font-size:12px;color:{COLOR_ACCENT};letter-spacing:2px;margin-bottom:6px;">每日战报</div>
+  <div style="font-size:12px;color:{COLOR_ACCENT};letter-spacing:1px;margin-bottom:6px;">去球吧<span style="color:#b8b8b8;padding:0 6px;">·</span>NBA 每日战报</div>
   <div style="font-size:24px;font-weight:bold;color:{COLOR_TEXT};margin-bottom:4px;">{esc(display_date)}<span style="font-size:12px;font-weight:normal;color:#a0a0a0;padding-left:7px;">美国时间</span></div>
   <div style="font-size:13px;color:{COLOR_MUTED};margin-bottom:24px;">共 {total} 场 ｜ 每行格式：客队 比分 : 比分 主队</div>
 
@@ -1904,6 +1904,7 @@ def render_page(games, game_date, display_date, tomorrow=None):
   {render_tomorrow(tomorrow)}
 
   <div style="font-size:12px;color:#b0b0b0;line-height:1.8;margin-top:6px;">
+    <span style="color:{COLOR_ACCENT};">去球吧</span> ｜ 每天一份 NBA 战报，只写场上发生的事<br>
     本文基于公开赛事数据独立撰写，与 NBA 及任何转播平台无关联。<br>
     比赛日 {esc(game_date)}（美国时间）｜ 数据来源：ESPN
   </div>
@@ -2078,12 +2079,12 @@ def main():
     except Exception as e:
         print(f"  封面图跳过：{e}")
 
-    # 头条素材同理：单独一份给头条用的选题稿，失败不影响战报
+    # 今日主打同理：从当天挑一场，出公众号次条 + 头条号两用的写作稿，失败不影响战报
     try:
-        import export_toutiao
-        export_toutiao.main()
+        import export_feature
+        export_feature.main()
     except Exception as e:
-        print(f"  头条素材跳过：{e}")
+        print(f"  今日主打跳过：{e}")
     return 0
 
 

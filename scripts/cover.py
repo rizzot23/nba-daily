@@ -171,21 +171,30 @@ def build():
         数字下面会留一大截空白，直接按字号算间距必然叠字，得用 bbox 量。"""
         return draw.textbbox((0, 0), text, font=font)
 
-    # 左上角橙底白字标签，和正文里的标签徽章同一套视觉
+    # 左上角橙底白字标签是品牌位，后面跟一行灰色小字说明品类 ——
+    # 只写「去球吧」，划过信息流的人看不出这是篮球号；只写「NBA 每日战报」，
+    # 又白浪费一块最显眼的位置。两个都要，但主次要分明，所以品牌用橙底实心。
     top_y = 44
-    label = "每日战报"
+    label = "去球吧"
     lw = draw.textlength(label, small)
     lb = ink_box(label, small)
     pad_x = 13
+    box_r = m + lw + pad_x * 2
     draw.rounded_rectangle(
-        [m - 1, top_y - 5, m + lw + pad_x * 2, top_y + lb[3] + 6],
+        [m - 1, top_y - 5, box_r, top_y + lb[3] + 6],
         radius=4, fill=ACCENT,
     )
     draw.text((m + pad_x, top_y), label, font=small, fill=(255, 255, 255))
+
+    kind = "NBA 每日战报"
     date_txt = cv.get("date") or ""
+    kw = draw.textlength(kind, small)
+    dw = draw.textlength(date_txt, small) if date_txt else 0
+    # 宽度不够就整段不画，宁可只留品牌，也不让字和日期叠在一起
+    if box_r + 12 + kw < W - m - dw - 18:
+        draw.text((box_r + 12, top_y), kind, font=small, fill=DIM)
     if date_txt:
-        tw = draw.textlength(date_txt, font=small)
-        draw.text((W - m - tw, top_y), date_txt, font=small, fill=DIM)
+        draw.text((W - m - dw, top_y), date_txt, font=small, fill=DIM)
 
     # 大比分向中间收拢。左右贴边会让中间空出三百多像素，像两行分开的账单；
     # 收拢之后整块像一块比分牌，两边留白对称，缩成信息流小图时也更聚。

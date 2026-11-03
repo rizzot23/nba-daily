@@ -1,4 +1,4 @@
-name: 每日战报生成
+name: 去球吧 每日战报
 
 on:
   schedule:
@@ -76,18 +76,27 @@ jobs:
               print("去看上面的「生成战报」步骤日志。")
               raise SystemExit
           d = json.loads(p.read_text(encoding="utf-8"))
-          print(f"### 每日战报 · {d['game_date']}（美国时间）\n")
+          print(f"### 去球吧 · {d['game_date']}（美国时间）\n")
           print(f"- 生成时间：{d['generated_at']}")
           print(f"- 完场场次：{d.get('total_games', 0)} 场")
           if d.get("headline"):
               print(f"- 今日最胶着：{d['headline']}")
+          # 今日主打：公众号次条和头条号都发这一场
+          f = pathlib.Path("docs/feature.json")
+          if f.exists():
+              fp = json.loads(f.read_text(encoding="utf-8"))
+              if fp.get("pick"):
+                  print(f"- 今日主打：{fp['pick']}（{fp.get('kind')}）")
+                  print(f"- 可用的头条标题：{fp.get('title')}")
+              else:
+                  print("- 今日主打：今天没有比赛，不发次条")
           t = d.get("tomorrow") or {}
           if t.get("status") == "play" and t.get("pick"):
               pk = t["pick"]
               print(f"- 明日焦点：{pk.get('away')} @ {pk.get('home')}（{pk.get('bj_date')} {pk.get('bj_time')}）")
           elif t.get("status") == "idle":
               print(f"- 明日休战，下一比赛日 {t.get('date_cn')}")
-          print("\n→ 成品：`docs/report.html`")
+          print("\n→ 成品：`docs/report.html`（公众号主条）、`docs/feature.md`（次条 + 头条）")
           PY
 
       # 只负责把人叫回来：推一条摘要到微信，点开就是 Pages 上的战报。
