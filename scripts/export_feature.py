@@ -21,6 +21,7 @@
 
 import json
 import sys
+import unicodedata
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -41,7 +42,17 @@ def load_json(path, default):
         return default
 
 
-PLAYERS = {str(k).lower(): v for k, v in (load_json(PLAYERS_FILE, {}) or {}).items()}
+def _nk(name):
+    """球员名的查表 key。必须和 fetch_nba.normalize_name 保持同一套规则 ——
+    两个脚本各自读同一份 players_zh.json，规则一旦分叉，同一份表在正文里能命中、
+    在写作稿里却查不到。"""
+    s = unicodedata.normalize("NFKD", str(name))
+    s = "".join(ch for ch in s if not unicodedata.combining(ch))
+    s = s.replace("\u2019", "'").replace("\u2018", "'").replace(".", "")
+    return " ".join(s.lower().split())
+
+
+PLAYERS = {_nk(k): v for k, v in (load_json(PLAYERS_FILE, {}) or {}).items()}
 
 
 # ------------------------------------------------------------------ 小工具
@@ -69,10 +80,11 @@ def player_cn(name):
     """英文全名转中文。没收录就退到姓氏 —— 单个姓氏比整串英文好读。"""
     if not name:
         return ""
-    key = " ".join(str(name).lower().replace(".", " ").split())
-    if key in PLAYERS:
-        return PLAYERS[key]
-    return str(name).split()[-1]
+    hit = PLAYERS.get(_nk(name))
+    if hit:
+        return hit
+    parts = [p for p in str(name).split() if p not in ("Jr.", "Sr.", "II", "III", "IV")]
+    return parts[-1] if parts else str(name)
 
 
 def winner(g):

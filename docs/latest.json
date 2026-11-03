@@ -1,10 +1,10 @@
 {
   "game_date": "2026-11-02",
-  "generated_at": "2026-11-03T21:41:04+08:00",
+  "generated_at": "2026-11-03T22:11:53+08:00",
   "total_games": 15,
   "postseason": false,
   "headline": "鹈鹕 135-134 灰熊",
-  "lead": "今天 15 场，最狠的一刻出在鹈鹕 135-134 灰熊：Fears 剩 7.3 秒投进反超球，此后对手再没得分，全场交替领先 16 次。",
+  "lead": "今天 15 场，最狠的一刻出在鹈鹕 135-134 灰熊：费尔斯剩 7.3 秒投进反超球，此后对手再没得分，全场交替领先 16 次。",
   "focus": [
     {
       "cn": "库里",
@@ -78,7 +78,7 @@
     "footer": "全联盟 15 场|"
   },
   "best_action": {
-    "player": "Fears",
+    "player": "费尔斯",
     "kind": "clutch",
     "dist_ft": null,
     "period": 5,

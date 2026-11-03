@@ -104,10 +104,16 @@ def cn_team(full_name, mapping):
 
 
 def normalize_name(name):
-    """去掉重音和花式撇号，让 Jokić / Jokic、D'Angelo / D’Angelo 都能命中。"""
+    """去掉重音、花式撇号和句点，让 Jokić / Jokic、D'Angelo / D’Angelo、
+    P.J. Washington / PJ Washington 都能命中同一份表。
+
+    句点是删掉而不是换成空格：ESPN 有时写 "P.J."、有时写 "PJ"，
+    换空格会变成 "p j" 和 "pj" 两种 key，删点才能归到一起。
+    """
     s = unicodedata.normalize("NFKD", str(name))
     s = "".join(ch for ch in s if not unicodedata.combining(ch))
-    return s.replace("\u2019", "'").replace("\u2018", "'").strip().lower()
+    s = s.replace("\u2019", "'").replace("\u2018", "'").replace(".", "")
+    return " ".join(s.lower().split())
 
 
 def cn_player(display_name, mapping):
