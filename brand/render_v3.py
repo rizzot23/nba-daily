@@ -298,6 +298,9 @@ def main():
     mock_list().save(OUT / "v3-mock-list.png")
     lockup().save(OUT / "v3-lockup.png")
     lockup(dark=True).save(OUT / "v3-lockup-reverse.png")
+    # 高清版：公众号正文插图按 2~3 倍图给，1x 在高密度屏上会发虚
+    lockup(scale=3).save(OUT / "v3-lockup-1200.png")
+    lockup(dark=True, scale=3).save(OUT / "v3-lockup-reverse-1200.png")
     print("已生成", len(list(OUT.glob("v3-*"))), "个文件")
 
 
