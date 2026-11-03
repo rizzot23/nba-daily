@@ -1,17 +1,28 @@
 # 去球吧 · 品牌资产
 
+三个版本并存，`README-v2.md` / `README-v3.md` 各自说明。**当前推荐 v3**（照片简笔画，球是球）。
+
+| 版本 | 参考 | 画法 | 目录 |
+|---|---|---|---|
+| v1 | `reference.png`（篮筐 + 球） | 几何化 | `out/` |
+| v2 | `reference2.png`（双色地 + 球压线） | 几何抽象 | `out2/` |
+| v3 | 同 v2 | 照片简笔画 | `out3/` |
+
 ## 文件
 
 | 文件 | 用途 |
 |---|---|
 | `sheet.html` | **先看这个**，一页规范：主形象、推导、三版标志、两个头像、尺寸测试、色值、规矩 |
 | `brand-brief.md` | 设计简报：七个要素、场景约束、取舍理由 |
-| `mark.json` | 标志的唯一数据源（3 个图元的坐标）。改了它就跑脚本重生成，别手改 SVG |
-| `render_assets.py` | 渲染 PNG 资产（头像、标记、横排组合、场景模拟） |
+| `brand-compare.png` | 照片 / v2 / v3 三方对照 |
+| `mark.json` | v1 标志的数据源（3 个图元的坐标） |
+| `render_assets.py` | v1 渲染 |
+| `render_v2.py` | v2 渲染（几何抽象版） |
+| `render_v3.py` | v3 渲染（照片简笔画版，**当前主用**） |
 | `fonts/SmileySans-Oblique.ttf` | 得意黑，SIL OFL 1.1，可商用。字标专用 |
-| `reference.png` | 参考视觉原图，所有几何比例都从它量出来 |
-| `dist/` | mark-to-spec 生成的技术规范（SVG 三版、净空图、尺寸测试、spec.html） |
-| `out/` | 实际要上传的 PNG |
+| `reference.png` / `reference2.png` | 参考视觉原图，比例全从它们量出来 |
+| `dist/` | v1 的技术规范（SVG 三版、净空图、尺寸测试、spec.html） |
+| `out/` `out2/` `out3/` | 实际要上传的 PNG |
 
 ## 重新生成
 
@@ -37,7 +48,13 @@ python brand/render_assets.py
 
 ## 上传
 
+**v3（推荐）**
+- 公众号头像 / 头条号头像：`out3/v3-avatar-640.png`
+- 正文页眉：`out3/v3-lockup.png`（深底用 `-reverse.png`）
+- 封面角标：`out3/v3-mark-256.png` 叠在拼色带上
+- 单色 / 水印：`out3/v3-mono-512.png`
+
+**v1（备选）**
 - 公众号头像：`out/avatar-wood-640.png`（备选 `out/avatar-640.png`）
-- 头条号头像：同上，一张两用
 - 正文页眉：`out/lockup.png`（深底用 `out/lockup-reverse.png`）
-- 封面角标：`out/mark-reverse-512.png` 叠在拼色带上
+- 封面角标：`out/mark-reverse-512.png`
