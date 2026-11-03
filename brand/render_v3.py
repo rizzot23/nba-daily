@@ -179,25 +179,69 @@ def flat(size=640):
                  ).resize((size, size), Image.LANCZOS)
 
 
+def _swipe(canvas, x0, x1, y, w, rise, curve, fill):
+    """手绘马克笔划：两头收细、中间最粗、整条微微上翘
+    比直线"有精神"的地方全在这个粗细变化和 3px 的弧上——直线读作尺子画的"""
+    n = 60
+    pts, wl = [], []
+    for i in range(n + 1):
+        t = i / n
+        pts.append((x0 + (x1 - x0) * t, y - rise * t - curve * sin(pi * t)))
+        wl.append(w * (0.25 + 0.75 * sin(pi * t) ** 0.55))
+    L, R = [], []
+    for i, p in enumerate(pts):
+        if i == 0:
+            dx, dy = pts[1][0] - p[0], pts[1][1] - p[1]
+        elif i == n:
+            dx, dy = p[0] - pts[-2][0], p[1] - pts[-2][1]
+        else:
+            dx, dy = pts[i + 1][0] - pts[i - 1][0], pts[i + 1][1] - pts[i - 1][1]
+        d = hypot(dx, dy) or 1
+        nx, ny = -dy / d, dx / d
+        L.append((p[0] + nx * wl[i] / 2, p[1] + ny * wl[i] / 2))
+        R.append((p[0] - nx * wl[i] / 2, p[1] - ny * wl[i] / 2))
+    lay = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    ImageDraw.Draw(lay).polygon(L + R[::-1], fill=fill + (255,))
+    canvas.alpha_composite(lay)
+
+
+def _tracked(d, xy, txt, font, fill, track=0.0):
+    """逐字排，给字间加余量（PIL 没有 letter-spacing）"""
+    x, y = xy
+    for ch in txt:
+        d.text((x, y), ch, font=font, fill=fill)
+        x += font.getlength(ch) + track
+    return x
+
+
 def lockup(dark=False, scale=2):
-    w, h = 960 * scale, 300 * scale
+    w, h = 980 * scale, 300 * scale
     im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     mh = int(184 * scale)
     mk = avatar(mh)
     im.alpha_composite(mk, (0, (h - mh) // 2))
-    f1 = ImageFont.truetype(FONT, int(64 * scale))
-    f2 = ImageFont.truetype(FONT, int(27 * scale))
+    f1 = ImageFont.truetype(FONT, int(74 * scale))
+    f2 = ImageFont.truetype(FONT, int(26 * scale))
     col = WHT if dark else INK
-    dd = ImageDraw.Draw(im)
-    tx = mh + int(40 * scale)
-    b1 = dd.textbbox((0, 0), "去球吧", font=f1)
-    b2 = dd.textbbox((0, 0), "NBA 每日战报", font=f2)
-    gap = int(26 * scale)
-    total = (b1[3] - b1[1]) + gap + (b2[3] - b2[1])
+    d = ImageDraw.Draw(im)
+    tx = mh + int(44 * scale)
+
+    tag = "NBA 每日战报"
+    track = 1.4 * scale
+    tag_w = sum(f2.getlength(c) for c in tag) + track * (len(tag) - 1)
+    b1 = d.textbbox((0, 0), "去球吧", font=f1)
+    gap = int(38 * scale)
+    total = (b1[3] - b1[1]) + gap + int(26 * scale * 0.95)
     y1 = (h - total) // 2 - b1[1]
-    y2 = y1 + (b1[3] - b1[1]) + gap - b2[1]
-    dd.text((tx, y1), "去球吧", font=f1, fill=col + (255,))
-    dd.text((tx, y2), "NBA 每日战报", font=f2, fill=col + (255,))
+    y2 = y1 + (b1[3] - b1[1]) + gap
+
+    d.text((tx, y1), "去球吧", font=f1, fill=col + (255,))
+    _tracked(d, (tx, y2), tag, f2, col + (255,), track)
+
+    # 名字下面那道黄划：整份组合里唯一的"手写"，多了就吵
+    ub = d.textbbox((tx, y1), "去球吧", font=f1)
+    _swipe(im, tx + 4 * scale, ub[2] - 2 * scale, ub[3] + 5 * scale,
+           9 * scale, 4 * scale, 3 * scale, YEL)
     return im.crop(im.getbbox())
 
 
