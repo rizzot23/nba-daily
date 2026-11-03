@@ -32,6 +32,10 @@ jobs:
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
+        with:
+          # 默认只拉最近 1 个提交（浅克隆），后面推送被拒时要 rebase，
+          # 浅克隆上 rebase 容易报错，所以这里拉全量。仓库很小，多花不到 1 秒。
+          fetch-depth: 0
 
       - name: 配置 Python
         uses: actions/setup-python@v5
@@ -48,8 +52,11 @@ jobs:
           echo "运行时间：$(date '+%Y-%m-%d %H:%M %Z')"
           python scripts/fetch_nba.py
 
+      # 下面两步都是「锦上添花」，任何一步挂掉都不该连累后面把战报推上去，
+      # 所以都挂 continue-on-error。
       - name: 写运行摘要
         if: always()
+        continue-on-error: true
         run: |
           python - <<'PY' >> $GITHUB_STEP_SUMMARY
           import json, pathlib
@@ -75,11 +82,13 @@ jobs:
 
       - name: 归档产物
         uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: daily-report-${{ github.run_number }}
           path: docs/
           retention-days: 30
 
+      # 真正要紧的一步放最后：前面任何一步出错都不影响它。
       - name: 回写仓库
         run: |
           git config user.name "nba-report-bot"
@@ -90,15 +99,21 @@ jobs:
             exit 0
           fi
           git commit -m "战报：$(date '+%Y-%m-%d') 自动生成"
-          # 万一同期有人在网页端改过文件，直接 push 会被拒；rebase 一次再推
+
+          # 有人在网页端改过文件时，直接 push 会被拒（non-fast-forward）。
+          # 拉取远端变基后再推，最多试三次。
           for i in 1 2 3; do
             if git push; then
-              echo "推送成功"
+              echo "推送成功（第 $i 次尝试）"
               exit 0
             fi
-            echo "第 $i 次推送失败，拉取远端后重试"
-            git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
-            sleep 3
+            echo "第 $i 次推送被拒，拉取远端后重试"
+            if ! git pull --rebase --autostash origin "$GITHUB_REF_NAME"; then
+              echo "变基失败，放弃本地这次提交（下次运行会自动重新生成）"
+              git rebase --abort 2>/dev/null || true
+              exit 1
+            fi
+            sleep 5
           done
-          echo "连续三次推送失败，请手动检查仓库状态"
+          echo "连续三次推送失败，请检查仓库权限或分支保护设置"
           exit 1

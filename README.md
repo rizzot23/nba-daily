@@ -58,7 +58,10 @@ git push -u origin main
 
 ### 2. 手动跑一次（验证链路）
 
-仓库页 → `Actions` → 如果看到黄色横幅「Workflows aren't being run on this forked repository」之类的提示，点 `I understand my workflows, go ahead and enable them`。
+**先改一个设置，否则跑完推不上去**：`Settings → Actions → General → Workflow permissions` → 选 **Read and write permissions** → Save。
+新仓库默认是只读的，机器人生成了战报但没权限提交回去，日志会报 403。
+
+然后：仓库页 → `Actions` → 如果看到黄色横幅「Workflows aren't being run on this forked repository」之类的提示，点 `I understand my workflows, go ahead and enable them`。
 
 左侧点「每日战报生成」→ 右侧 `Run workflow` → 下拉选 `main` → 再点绿色 `Run workflow`。
 
@@ -135,7 +138,7 @@ Settings → Pages → Source 选 `Deploy from a branch` → Branch 选 `main`�
 
 **改焦点球星**：编辑 `scripts/focus.json`，每项三个字段 —— `en`（ESPN 里的英文全名，必须完全一致）、`cn`（中文名）、`team`（所属球队英文全名，用于判断「球队打了但人没上」）。
 
-当前名单：库里、东契奇、詹姆斯、恩比德、杜兰特、文班亚马、杨瀚森。杨瀚森在 ESPN 里写作 **`Yang Hansen`**（姓在前），别写成 `Hansen Yang`。
+当前名单：库里、东契奇、詹姆斯、杜兰特、文班亚马、杨瀚森。杨瀚森在 ESPN 里写作 **`Yang Hansen`**（姓在前），别写成 `Hansen Yang`。
 
 每天自动判断三种情况：**上场了给数据，球队打了但人没上标「（未出场）」，球队当天没比赛就整条不出现**。所以这份名单不需要每天维护。
 
@@ -156,6 +159,13 @@ NBA 不是每天都有比赛（全明星周末、感恩节、圣诞前一天都�
 
 **定时任务没按时跑**
 GitHub Actions 的定时任务有 3–15 分钟延迟，属于正常。另外仓库连续 60 天没有提交，GitHub 会自动暂停定时任务，手动跑一次即可恢复。
+
+**日志里有战报，但仓库里的 `docs/` 没更新（推送被拒）**
+按可能性从高到低查三件事：
+
+1. **仓库的 Workflow 权限是只读的**（最常见）。`Settings → Actions → General → Workflow permissions` 必须选 **Read and write permissions**。工作流里写的 `permissions: contents: write` 只能往下削，不能突破仓库这一层的上限，所以仓库设成只读时，那行写了也没用，日志会报 `403`。
+2. **`main` 开了分支保护**。`Settings → Branches` 里如果给 `main` 加了规则，机器人推不进去，会报 `protected branch hook declined`。要么关掉，要么把 `nba-report-bot` 加进例外。
+3. **真的撞车了**。有人在任务运行的那两分钟里在网页端改过文件，`git push` 会因 non-fast-forward 被拒。工作流本身会 `pull --rebase` 后重试三次，多数情况能自己解决；连续三次失败才会报错，这时手动 `Run workflow` 一次即可。
 
 **走势图不显示**
 图是相对路径 `charts/xxx.png`，只有在 `docs/` 目录一起提交、并且从 Pages 地址打开时才能显示。本地直接双击 `report.html` 也能看；但如果只把 html 单独拷走，图会丢。
