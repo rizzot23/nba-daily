@@ -80,6 +80,16 @@ jobs:
           print("\n→ 成品：`docs/report.html`")
           PY
 
+      # 只负责把人叫回来：推一条摘要到微信，点开就是 Pages 上的战报。
+      # 不碰公众号任何接口 —— 个人订阅号没有群发权限，最后一步必须人工点。
+      # 没配 SC_KEY 就静默跳过。
+      - name: 微信提醒
+        continue-on-error: true
+        env:
+          SC_KEY: ${{ secrets.SC_KEY }}
+          REPORT_URL: ${{ vars.REPORT_URL }}
+        run: python scripts/notify.py
+
       - name: 归档产物
         uses: actions/upload-artifact@v4
         continue-on-error: true
