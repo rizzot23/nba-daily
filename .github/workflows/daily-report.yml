@@ -42,6 +42,16 @@ jobs:
         with:
           python-version: "3.11"
 
+      # 封面图要画中文，需要 Pillow + 一个开源中文字体。
+      # 不能用 Windows 的微软雅黑（微软版权，进不了仓库），也装不到 Ubuntu 上。
+      # 这一步失败不影响出稿 —— cover.py 会自己跳过，战报照常生成。
+      - name: 装封面依赖
+        continue-on-error: true
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-wqy-zenhei
+          python -m pip install --quiet --disable-pip-version-check pillow
+
       # 数据来自 ESPN 公开接口，不需要任何 Key。
       # BALLDONTLIE_API_KEY 只是 ESPN 万一改接口时的比分兜底，没配也能跑。
       - name: 生成战报

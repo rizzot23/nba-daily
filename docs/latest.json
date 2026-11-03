@@ -1,7 +1,8 @@
 {
   "game_date": "2026-11-02",
-  "generated_at": "2026-11-03T20:36:03+08:00",
+  "generated_at": "2026-11-03T21:18:09+08:00",
   "total_games": 15,
+  "postseason": false,
   "headline": "鹈鹕 135-134 灰熊",
   "lead": "今天 15 场，最狠的一刻出在鹈鹕 135-134 灰熊：Fears 剩 7.3 秒投进反超球，此后对手再没得分，全场交替领先 16 次。",
   "focus": [
@@ -66,6 +67,16 @@
       "ast": ""
     }
   ],
+  "cover": {
+    "date": "2026年11月2日",
+    "away": "鹈鹕",
+    "away_score": 135,
+    "away_color": "0a2240",
+    "home": "灰熊",
+    "home_score": 134,
+    "home_color": "5d76a9",
+    "footer": "全联盟 15 场|"
+  },
   "best_action": {
     "player": "Fears",
     "kind": "clutch",
@@ -79,6 +90,7 @@
     "date_cn": "11月4日（周三）",
     "days_ahead": 2,
     "total": 14,
+    "postseason": false,
     "pick": {
       "away": "76人",
       "home": "活塞",
@@ -92,6 +104,7 @@
       "stars": [
         "詹姆斯"
       ],
+      "postseason": false,
       "facts": [
         "ESPN 全美直播",
         "两队战绩咬在一起（7胜1负 / 6胜1负）",
@@ -148,6 +161,7 @@
       "away_score": 117,
       "home_score": 112,
       "label": "今日最胶着",
+      "series": null,
       "hook": "雷霆只赢 5 分，最后时刻才定胜负。",
       "drama": {
         "lead_changes": 19,
@@ -164,6 +178,7 @@
       "away_score": 124,
       "home_score": 91,
       "label": null,
+      "series": null,
       "hook": "活塞最多领先 33 分，最终赢 33 分。",
       "drama": {
         "lead_changes": 7,
@@ -180,6 +195,7 @@
       "away_score": 108,
       "home_score": 104,
       "label": null,
+      "series": null,
       "hook": "全场交替领先 4 次、打平 4 次，老鹰最后阶段才拉开 4 分。",
       "drama": {
         "lead_changes": 4,
@@ -196,6 +212,7 @@
       "away_score": 90,
       "home_score": 103,
       "label": null,
+      "series": null,
       "hook": "尼克斯最多领先 16 分，最终赢 13 分。",
       "drama": {
         "lead_changes": 9,
@@ -212,6 +229,7 @@
       "away_score": 103,
       "home_score": 94,
       "label": null,
+      "series": null,
       "hook": "全场交替领先 11 次、打平 12 次，奇才最后阶段才拉开 9 分。",
       "drama": {
         "lead_changes": 11,
@@ -228,6 +246,7 @@
       "away_score": 107,
       "home_score": 126,
       "label": null,
+      "series": null,
       "hook": "76人最多领先 22 分，最终赢 19 分。",
       "drama": {
         "lead_changes": 4,
@@ -244,6 +263,7 @@
       "away_score": 115,
       "home_score": 100,
       "label": null,
+      "series": null,
       "hook": "国王最多领先 19 分，最终赢 15 分。",
       "drama": {
         "lead_changes": 17,
@@ -260,6 +280,7 @@
       "away_score": 135,
       "home_score": 134,
       "label": null,
+      "series": null,
       "hook": "全场交替领先 16 次、打平 8 次，鹈鹕最后阶段才拉开 1 分。",
       "drama": {
         "lead_changes": 16,
@@ -286,6 +307,7 @@
       "away_score": 100,
       "home_score": 112,
       "label": null,
+      "series": null,
       "hook": "全场交替领先 5 次、打平 3 次，森林狼最后阶段才拉开 12 分。",
       "drama": {
         "lead_changes": 5,
@@ -302,6 +324,7 @@
       "away_score": 93,
       "home_score": 109,
       "label": "今日最平淡",
+      "series": null,
       "hook": "火箭最多领先 18 分，最终赢 16 分。",
       "drama": {
         "lead_changes": 0,
@@ -318,6 +341,7 @@
       "away_score": 97,
       "home_score": 119,
       "label": null,
+      "series": null,
       "hook": "马刺最多领先 26 分，最终赢 22 分。",
       "drama": {
         "lead_changes": 1,
@@ -334,6 +358,7 @@
       "away_score": 118,
       "home_score": 110,
       "label": null,
+      "series": null,
       "hook": "开拓者一度落后 14 分，翻盘赢 8 分。",
       "drama": {
         "lead_changes": 3,
@@ -350,6 +375,7 @@
       "away_score": 113,
       "home_score": 116,
       "label": "今日最大逆转",
+      "series": null,
       "hook": "勇士一度落后 17 分，翻盘赢 3 分。",
       "drama": {
         "lead_changes": 3,
@@ -366,6 +392,7 @@
       "away_score": 125,
       "home_score": 118,
       "label": null,
+      "series": null,
       "hook": "猛龙一度落后 16 分，翻盘赢 7 分。",
       "drama": {
         "lead_changes": 1,
@@ -382,6 +409,7 @@
       "away_score": 117,
       "home_score": 138,
       "label": null,
+      "series": null,
       "hook": "湖人最多领先 24 分，最终赢 21 分。",
       "drama": {
         "lead_changes": 1,

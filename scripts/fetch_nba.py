@@ -567,6 +567,8 @@ def parse_event(event, mapping):
             "name_en": team.get("displayName") or team.get("name") or "",
             "abbr": team.get("abbreviation") or "",
             "team_id": str(team.get("id") or ""),
+            # ESPN 给的是不带 # 的六位十六进制，画封面渐变时用
+            "color": (team.get("color") or "").strip(),
             "score": int(c["score"]) if str(c.get("score", "")).isdigit() else None,
             "lines": _linescores(c),
             "record": rec,
@@ -576,11 +578,17 @@ def parse_event(event, mapping):
     if not sides["home"] or not sides["away"]:
         return None
 
+    # 赛季类型：2=常规赛，3=季后赛（含附加赛）。猜不出来时按常规赛处理。
+    season = event.get("season") or {}
+    postseason = int(season.get("type") or 0) == 3 or "post" in str(season.get("slug") or "").lower()
+
     game = {
         "id": event.get("id"),
         "home": sides["home"],
         "away": sides["away"],
         "finished": finished,
+        "postseason": postseason,
+        "series": None,
         "status_text": status.get("description") or "",
         "tipoff_bj": "",
         "scorers": {"home": [], "away": []},
@@ -602,9 +610,71 @@ def parse_event(event, mapping):
     return game
 
 
+def parse_series(comp, game):
+    """系列赛大比分。只认 type=playoff 的那组。
+
+    常规赛也会返回一组 series，但那是「赛季系列赛」（同两队 4 次交手的战绩，
+    summary 写作 "NO leads series 1-0"），直接拿来显示会把读者绕晕，所以按 type 过滤。
+    另外不要去翻译 summary 那句英文 —— 里面是 ESPN 的队名缩写，和我们的中文队名对不上；
+    用 competitors[].wins 配 team id 自己拼才准。
+    """
+    for s in comp.get("series") or []:
+        if (s.get("type") or "").lower() != "playoff":
+            continue
+        wins = {}
+        for c in s.get("competitors") or []:
+            tid = str(c.get("id") or "")
+            if tid in (game["home"]["team_id"], game["away"]["team_id"]):
+                wins[tid] = int(c.get("wins") or 0)
+        if len(wins) != 2:
+            continue
+        hw = wins.get(game["home"]["team_id"], 0)
+        aw = wins.get(game["away"]["team_id"], 0)
+        return {
+            "home": hw,
+            "away": aw,
+            "total": int(s.get("totalCompetitions") or 0),
+            "completed": bool(s.get("completed")),
+        }
+    return None
+
+
+def series_text(g):
+    """把系列赛比分说成一句人话。不是季后赛或拿不到数据时返回 None。"""
+    s = g.get("series")
+    if not s:
+        return None
+    hw, aw = s["home"], s["away"]
+    if hw == 0 and aw == 0:
+        return None
+    home_cn = cn_team(g["home"]["name_en"], TEAM_MAP)
+    away_cn = cn_team(g["away"]["name_en"], TEAM_MAP)
+    hi, lo = (hw, aw) if hw > aw else (aw, hw)
+    lead_cn = home_cn if hw > aw else away_cn
+
+    if hw == aw:
+        body = f"系列赛 {hw}-{aw} 打平"
+    elif s.get("completed"):
+        body = f"{lead_cn} {hi}-{lo} 晋级"
+    else:
+        body = f"{lead_cn} {hi}-{lo} 领先"
+        # 七场四胜制，先到 4 分晋级，3 分就是赛点
+        if hi == 3:
+            body += " · 手握赛点"
+    return body
+
+
 def enrich_with_summary(game, summary, mapping):
     """补球队统计、单节比分、球员数据。任一项失败不影响主流程。"""
     comp = (summary.get("header", {}).get("competitions") or [{}])[0]
+
+    # 季后赛才有意义：系列赛大比分。常规赛返回的那组是"赛季系列赛"，parse_series 里已过滤
+    try:
+        game["series"] = parse_series(comp, game)
+    except Exception:
+        game["series"] = None
+    if game["series"]:
+        game["postseason"] = True
 
     # 用 header 里的数据校正比分与单节（比 scoreboard 更完整）
     for c in comp.get("competitors") or []:
@@ -734,6 +804,9 @@ LABELS = {
     "fallen": ("今日最功亏一篑", "#7a4b8f"),
     "flat": ("今日最平淡", "#9a9a9a"),
 }
+
+# 一场详写的上限。常规赛收官日会 30 队同天开打，全展开页面会长得没法看
+MAX_DETAIL = 15
 
 
 def assign_labels(played):
@@ -1046,10 +1119,27 @@ def parse_preview(event):
                 break
         sides[side] = {
             "name_en": (c.get("team") or {}).get("displayName") or "",
+            "team_id": str((c.get("team") or {}).get("id") or ""),
             "record": rec,
         }
     if len(sides) != 2:
         return None
+
+    # 季后赛的系列赛大比分。常规赛那组 type=season 的不能要，理由见 parse_series
+    season = event.get("season") or {}
+    postseason = int(season.get("type") or 0) == 3 or "post" in str(season.get("slug") or "").lower()
+    series = None
+    for s in comp.get("series") or []:
+        if (s.get("type") or "").lower() != "playoff":
+            continue
+        w = {str(x.get("id") or ""): int(x.get("wins") or 0) for x in (s.get("competitors") or [])}
+        series = {
+            "home": w.get(sides["home"]["team_id"], 0),
+            "away": w.get(sides["away"]["team_id"], 0),
+            "completed": bool(s.get("completed")),
+        }
+        postseason = True
+        break
 
     national = []
     for b in comp.get("broadcasts") or []:
@@ -1073,6 +1163,8 @@ def parse_preview(event):
         "home": sides["home"],
         "national": national,
         "bj_dt": bj_dt,
+        "postseason": postseason,
+        "series": series,
         "cup": any("cup" in (n.get("headline") or "").lower() for n in (comp.get("notes") or [])),
     }
 
@@ -1147,13 +1239,29 @@ def preview_facts(pv):
         facts.append(f'{pv["national"][0]} 全美直播')
     if pv["cup"]:
         facts.append("NBA 杯小组赛")
-    pa, ph = _win_pct(pv["away"]["record"]), _win_pct(pv["home"]["record"])
-    recs = f'{record_cn(pv["away"]["record"])} / {record_cn(pv["home"]["record"])}'
-    if pa is not None and ph is not None:
-        if abs(pa - ph) <= 0.06 and min(pa, ph) >= 0.45:
-            facts.append(f"两队战绩咬在一起（{recs}）")
-        elif min(pa, ph) >= 0.55:
-            facts.append(f"两边都赢得多（{recs}）")
+
+    # 季后赛里常规赛战绩不是读者关心的东西，"6胜1负"这种推荐理由等于没说，
+    # 换成系列赛大比分 —— 那才是决定这场有多要紧的数字。
+    s = pv.get("series")
+    if pv.get("postseason") and s:
+        hw, aw = s.get("home") or 0, s.get("away") or 0
+        if hw == 0 and aw == 0:
+            facts.append("系列赛首战")
+        elif hw == aw:
+            facts.append(f"系列赛 {hw}-{aw} 打平")
+        else:
+            hi, lo = max(hw, aw), min(hw, aw)
+            lead = cn_team(pv["home"]["name_en"], TEAM_MAP) if hw > aw else cn_team(pv["away"]["name_en"], TEAM_MAP)
+            facts.append(f"{lead} {hi}-{lo} 领先" + ("，赢下就晋级" if hi == 3 else ""))
+    else:
+        pa, ph = _win_pct(pv["away"]["record"]), _win_pct(pv["home"]["record"])
+        recs = f'{record_cn(pv["away"]["record"])} / {record_cn(pv["home"]["record"])}'
+        if pa is not None and ph is not None:
+            if abs(pa - ph) <= 0.06 and min(pa, ph) >= 0.45:
+                facts.append(f"两队战绩咬在一起（{recs}）")
+            elif min(pa, ph) >= 0.55:
+                facts.append(f"两边都赢得多（{recs}）")
+
     if pv["stars"]:
         facts.append("、".join(pv["stars"]) + " 出战")
     return facts
@@ -1170,6 +1278,7 @@ def _pick_payload(pv):
         "bj_time": bj.strftime("%H:%M") if bj else "",
         "national": pv["national"],
         "stars": pv["stars"],
+        "postseason": bool(pv.get("postseason")),
         "facts": preview_facts(pv),
         "score": pv.get("_score", 0),
     }
@@ -1202,6 +1311,7 @@ def build_tomorrow(game_date):
             "date_cn": date_cn(day, with_weekday=True),
             "days_ahead": i,
             "total": len(previews),
+            "postseason": any(pv.get("postseason") for pv in previews),
             "pick": _pick_payload(pick),
             "watch": watch_list(previews, pick, set(stars_by_team)),
         }
@@ -1321,6 +1431,35 @@ def render_scorers_table(away_label, away_scorers, home_label, home_scorers):
     )
 
 
+def render_folded(games):
+    """被折叠的场次：只留一行比分，不占版面。
+
+    只出现在一天场次超过 MAX_DETAIL 的时候（常规赛收官日、或者赛季初的超级比赛日）。
+    """
+    rows = []
+    for g in games:
+        home, away = g["home"], g["away"]
+        hs, as_ = home["score"], away["score"]
+        hw = hs is not None and as_ is not None and hs > as_
+        aw = hs is not None and as_ is not None and as_ > hs
+        a_sty = f"color:{COLOR_TEXT};font-weight:bold;" if aw else "color:#a8a8a8;"
+        h_sty = f"color:{COLOR_TEXT};font-weight:bold;" if hw else "color:#a8a8a8;"
+        rows.append(
+            f'<div style="font-size:12px;line-height:2.0;font-family:{FONT};">'
+            f'<span style="{a_sty}">{esc(cn_team(away["name_en"], TEAM_MAP))}</span>'
+            f'<span style="color:{COLOR_ACCENT};padding:0 6px;">'
+            f'{esc(as_ if as_ is not None else "-")}-{esc(hs if hs is not None else "-")}</span>'
+            f'<span style="{h_sty}">{esc(cn_team(home["name_en"], TEAM_MAP))}</span>'
+            f'</div>'
+        )
+    return (
+        '<div style="margin:24px 0 0;padding:14px 16px;background:#fafafa;">'
+        f'<div style="font-size:11px;color:#b0b0b0;letter-spacing:1px;margin-bottom:4px;'
+        f'font-family:{FONT};">另外 {len(games)} 场</div>'
+        + "".join(rows) + "</div>"
+    )
+
+
 def render_game(g, label_key=None, highlight=None):
     home, away = g["home"], g["away"]
     hs, as_ = home["score"], away["score"]
@@ -1378,6 +1517,14 @@ def render_game(g, label_key=None, highlight=None):
     <td style="{side_style(home_win, 'left')}width:36%;">{esc(cn_team(home["name_en"], TEAM_MAP))}</td>
   </tr>
 </table>''')
+
+    # 系列赛大比分：季后赛里读者第一个想知道的数字，压在比分正下方
+    st = series_text(g)
+    if st:
+        parts.append(
+            f'<div style="text-align:center;font-size:12px;color:{COLOR_ACCENT};'
+            f'letter-spacing:1px;margin:4px 0 0;font-family:{FONT};">{esc(st)}</div>'
+        )
 
     # 单节比分
     al, hl = away["lines"], home["lines"]
@@ -1491,10 +1638,12 @@ def render_game(g, label_key=None, highlight=None):
     meta = []
     if g.get("tipoff_bj"):
         meta.append(f"北京 {g['tipoff_bj']} 开球")
-    if away.get("record"):
-        meta.append(f"{cn_team(away['name_en'], TEAM_MAP)} {away['record']}")
-    if home.get("record"):
-        meta.append(f"{cn_team(home['name_en'], TEAM_MAP)} {home['record']}")
+    # 季后赛 ESPN 给的 record 就是系列赛战绩，比分上面那行已经写了，这里重复反而糊
+    if not g.get("series"):
+        if away.get("record"):
+            meta.append(f"{cn_team(away['name_en'], TEAM_MAP)} {away['record']}")
+        if home.get("record"):
+            meta.append(f"{cn_team(home['name_en'], TEAM_MAP)} {home['record']}")
     if meta:
         parts.append(
             f'<div style="font-size:11px;color:#c0c0c0;margin-top:6px;font-family:{FONT};">'
@@ -1606,7 +1755,8 @@ def render_tomorrow(info):
     # 焦点场次（休战时的「下一个比赛日」也复用它）
     def pick_block():
         rec_a, rec_h = record_cn(pick.get("away_record")), record_cn(pick.get("home_record"))
-        recs = " / ".join(x for x in (rec_a, rec_h) if x)
+        # 季后赛的常规赛战绩没有参考价值，系列赛比分已经写进 facts 里了
+        recs = "" if pick.get("postseason") else " / ".join(x for x in (rec_a, rec_h) if x)
         meta = []
         if pick.get("bj_date"):
             meta.append(f'北京时间 {pick["bj_date"]} {pick.get("bj_time", "")}'.strip())
@@ -1650,10 +1800,15 @@ def render_tomorrow(info):
 
     # 明天就打
     if info.get("status") == "play":
+        tail = (
+            f"{info['total']} 场季后赛，这是最值得定闹钟的一场"
+            if info.get("postseason")
+            else f"全联盟 {info['total']} 场，这是最值得定闹钟的一场"
+        )
         return (
             wrap_open + head + pick_block() + watch_block() +
             f'<div style="font-size:11px;color:#c4c4c4;margin-top:8px;font-family:{FONT};">'
-            f'明天全联盟 {info["total"]} 场，这是最值得定闹钟的一场</div>'
+            f'明天{tail}</div>'
             + wrap_close
         )
 
@@ -1676,7 +1831,8 @@ def render_tomorrow(info):
         f'<div style="margin-top:6px;">{pick_block()}</div>'
         f'{watch_block()}'
         f'<div style="font-size:11px;color:#c4c4c4;margin-top:8px;font-family:{FONT};">'
-        f'那天全联盟 {info["total"]} 场</div>'
+        f'那天{"全联盟 " if not info.get("postseason") else ""}{info["total"]} 场'
+        f'{"季后赛" if info.get("postseason") else ""}</div>'
         + wrap_close
     )
 
@@ -1691,10 +1847,24 @@ def render_page(games, game_date, display_date, tomorrow=None):
     best_act = best[1] if best else None
 
     if total:
+        # 常规赛收官日会让 30 队同一天打完，全展开的话页面长度翻倍。
+        # 超过 MAX_DETAIL 场就把激烈度最低的那些压成一行比分，其余照常详写。
+        detail, folded = played, []
+        if total > MAX_DETAIL:
+            keep_ids = {
+                g["id"] for g in sorted(
+                    played, key=lambda x: -((x.get("drama") or {}).get("score") or 0)
+                )[:MAX_DETAIL]
+            }
+            detail = [g for g in played if g["id"] in keep_ids]   # 保持开球时间顺序
+            folded = [g for g in played if g["id"] not in keep_ids]
+
         blocks = "".join(
             render_game(g, labels.get(g["id"]), best_act if g["id"] == best_id else None)
-            for g in played
+            for g in detail
         )
+        if folded:
+            blocks += render_folded(folded)
     else:
         pending = [g for g in games if not g.get("finished")]
         if pending:
@@ -1828,10 +1998,30 @@ def main():
     headline = pick_headline(finished)
     labels = assign_labels(finished)
     best = pick_best_action(finished)
+    # 封面图用头条那场：队名、比分、两队官方主色（ESPN 的 team.color）
+    cover = None
+    cover_g = headline or (finished[0] if finished else None)
+    if cover_g:
+        y, mo, dd = str(game_date).split("-")
+        tag = LABELS[labels[cover_g["id"]]][0] if cover_g["id"] in labels else ""
+        cover = {
+            "date": f"{int(y)}年{int(mo)}月{int(dd)}日",
+            "away": cn_team(cover_g["away"]["name_en"], TEAM_MAP),
+            "away_score": cover_g["away"]["score"],
+            "away_color": cover_g["away"].get("color") or "",
+            "home": cn_team(cover_g["home"]["name_en"], TEAM_MAP),
+            "home_score": cover_g["home"]["score"],
+            "home_color": cover_g["home"].get("color") or "",
+            "footer": (
+                f"{len(finished)} 场季后赛" if any(g.get("postseason") for g in finished)
+                else f"全联盟 {len(finished)} 场"
+            ) + f"|{tag}",
+        }
     summary = {
         "game_date": str(game_date),
         "generated_at": datetime.now(BJ_TZ).isoformat(timespec="seconds"),
         "total_games": len(finished),
+        "postseason": any(g.get("postseason") for g in finished),
         "headline": (
             f'{cn_team(headline["away"]["name_en"], TEAM_MAP)} '
             f'{headline["away"]["score"]}-{headline["home"]["score"]} '
@@ -1839,6 +2029,7 @@ def main():
         ) if headline else None,
         "lead": build_lead(games),
         "focus": build_focus(finished),
+        "cover": cover,
         "best_action": ({
             "player": cn_player(best[1]["player_en"], PLAYER_MAP) if best[1].get("player_en") else None,
             "kind": best[1]["kind"],
@@ -1856,6 +2047,7 @@ def main():
             "away_score": g["away"]["score"],
             "home_score": g["home"]["score"],
             "label": LABELS[labels[g["id"]]][0] if g["id"] in labels else None,
+            "series": series_text(g),
             "hook": build_hook(g, labels.get(g["id"]) == "drama"),
             "drama": {
                 "lead_changes": (g.get("drama") or {}).get("lead_changes", 0),
@@ -1873,6 +2065,13 @@ def main():
 
     print(f"[5/5] 完成：{out_path}")
     print(f"      {OUT_DIR / 'latest.json'}（{len(finished)} 场）")
+
+    # 封面图是附加产物：没有 Pillow 或中文字体就跳过，绝不能因此让战报出不来
+    try:
+        import cover as cover_mod
+        cover_mod.build()
+    except Exception as e:
+        print(f"  封面图跳过：{e}")
     return 0
 
 
