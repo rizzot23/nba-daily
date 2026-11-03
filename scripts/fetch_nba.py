@@ -1048,6 +1048,140 @@ def render_focus(items):
     )
 
 
+# ---------------------------------------------------------------- 推荐比赛
+
+WATCH_MAX = 3        # 最多推荐几场。再多就不叫"推荐"，叫第二份赛果清单了
+
+
+def overtimes(g):
+    """加时次数：分节得分比 4 节长几节，就是打了几个加时。"""
+    return max(0, max(len(g["home"].get("lines") or []),
+                      len(g["away"].get("lines") or [])) - 4)
+
+
+def watch_ok(g, margin):
+    """硬门槛：至少占一条才叫好看。一条都占不上就不写。
+
+    「好看」只认能拿数据复核的四类：最后一球定胜负、加时、两位数逆转、
+    最后时刻还在一个球以内。主观的"精彩"一律不算——没有标准就会场场都推。
+    """
+    dr = g.get("drama") or {}
+    if not dr.get("ok"):
+        return margin <= 5          # 没有逐回合数据时只能看分差
+    if dr.get("clutch"):
+        return True
+    if overtimes(g):
+        return True
+    if (dr.get("comeback") or 0) >= 12:
+        return True
+    if margin <= 3:
+        return True
+    close = dr.get("close_seconds") or 0
+    # 分差拉开过，但末节长时间贴着打——看了不亏
+    return (margin <= 6 and close >= 180) or (margin <= 10 and close >= 360)
+
+
+def watch_rank(g):
+    """排序分：激烈度打底，绝杀、加时、大逆转各加码。只影响顺序，不决定收不收。"""
+    dr = g.get("drama") or {}
+    s = dr.get("score") or 0
+    if dr.get("clutch"):
+        s += 30
+    s += overtimes(g) * 12
+    s += min(dr.get("comeback") or 0, 25) * 0.8
+    return s
+
+
+def watch_reason(g, margin):
+    """一句话理由。只讲最抓人的那一件，不把四个数据点堆成一句话。
+
+    顺序按「信息量」排，不按数据算出来的先后：一场 4 分球如果末节整节
+    都没拉开，写"末节没拉开"比写"打平 4 次"有用得多。
+    """
+    dr = g.get("drama") or {}
+    cl = dr.get("clutch")
+    ot = overtimes(g)
+    cb = dr.get("comeback") or 0
+    lc = dr.get("lead_changes") or 0
+    close = dr.get("close_seconds") or 0
+    f2 = dr.get("final2_max_diff")
+
+    if cl and cl.get("kind") == "buzzer":
+        return "压哨绝杀"
+    if cl:
+        return f"最后 {int(round(cl.get('clock') or 0))} 秒反超"
+    if ot:
+        return "加时才分出胜负" if ot == 1 else f"{ot} 个加时才分出胜负"
+    if cb >= 12:
+        return f"落后 {cb} 分翻盘"
+    if f2 is not None and f2 <= 2:
+        return "最后两分钟没超过一个球"
+    if lc >= 12:
+        return f"交替领先 {lc} 次"
+    if close >= 480:
+        return "末节整节没拉开"
+    if close >= 240:
+        return "末节大半节贴着打"
+    return f"只差 {margin} 分"
+
+
+def pick_watchable(played, skip_id=None):
+    """挑几场值得看的，按好看程度排。导语讲过的那场跳过，不重复。"""
+    picks = []
+    for g in played:
+        if skip_id and g.get("id") == skip_id:
+            continue
+        hs, as_ = g["home"]["score"], g["away"]["score"]
+        if hs is None or as_ is None:
+            continue
+        margin = abs(hs - as_)
+        if not margin:
+            continue
+        if not watch_ok(g, margin):
+            continue
+        picks.append((g, margin))
+    picks.sort(key=lambda x: watch_rank(x[0]), reverse=True)
+    return [(g, watch_reason(g, m)) for g, m in picks[:WATCH_MAX]]
+
+
+def render_watchable(picks):
+    """推荐比赛：给只看一两场的人一个入口。没有够格的就整块不出。"""
+    if not picks:
+        return ""
+
+    rows = []
+    for g, reason in picks:
+        hs, as_ = g["home"]["score"], g["away"]["score"]
+        home_cn = cn_team(g["home"]["name_en"], TEAM_MAP)
+        away_cn = cn_team(g["away"]["name_en"], TEAM_MAP)
+        # 胜方比分上色，扫一眼就知道谁赢，不用去比两个数字
+        aw = (f"font-weight:700;color:{COLOR_ACCENT};" if as_ > hs
+              else f"color:{COLOR_TEXT};")
+        hw = (f"font-weight:700;color:{COLOR_ACCENT};" if hs > as_
+              else f"color:{COLOR_TEXT};")
+        rows.append(
+            f'<div style="font-size:13px;line-height:2.2;color:{COLOR_TEXT};'
+            f'font-family:{FONT};">'
+            f'<span>{esc(away_cn)}</span>'
+            f'<span style="{aw}padding:0 5px;">{as_}</span>'
+            f'<span style="color:#d4d4d4;">-</span>'
+            f'<span style="{hw}padding:0 5px;">{hs}</span>'
+            f'<span>{esc(home_cn)}</span>'
+            f'<span style="font-size:11px;color:#e0e0e0;padding:0 8px;">·</span>'
+            f'<span style="font-size:12px;color:#9a9a9a;">'
+            f'{esc(reason)}</span>'
+            f'</div>'
+        )
+
+    return (
+        f'<div style="margin:0 0 24px;">'
+        f'<div style="font-size:11px;color:#9a9a9a;letter-spacing:2px;margin-bottom:2px;'
+        f'font-family:{FONT};">推荐比赛</div>'
+        f'{"".join(rows)}'
+        f'</div>'
+    )
+
+
 # ---------------------------------------------------------------- 明日焦点
 
 WEEKDAY_CN = ("周一", "周二", "周三", "周四", "周五", "周六", "周日")
@@ -1848,6 +1982,10 @@ def render_page(games, game_date, display_date, tomorrow=None):
     total = len(played)
     labels = assign_labels(played)
 
+    # 推荐比赛要跳过导语讲的那一场，否则同一场在页首出现两次
+    head = pick_headline(played)
+    head_id = head["id"] if head else None
+
     best = pick_best_action(played)
     best_id = best[0]["id"] if best else None
     best_act = best[1] if best else None
@@ -1904,6 +2042,8 @@ def render_page(games, game_date, display_date, tomorrow=None):
   </div>
 
   {render_focus(build_focus(games))}
+
+  {render_watchable(pick_watchable(played, head_id))}
 
   {blocks}
 
