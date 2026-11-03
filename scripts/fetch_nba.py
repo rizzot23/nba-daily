@@ -813,11 +813,13 @@ def build_lead(games):
     ties = dr.get("ties") or 0
 
     # 头条是绝杀场时，整句直接围绕那一球写，比数列举更有画面
+    # 措辞用「一刻」不用「一场」：绝杀场未必是全天最胶着的那场，
+    # 说「最狠的一场」会和下面挂的「今日最胶着」徽章互相打脸
     clutch = clutch_text(head)
     if clutch:
         extra = f"，全场交替领先 {lc} 次" if lc else ""
         return (
-            f"今天 {len(played)} 场，最狠的一场是{away_cn} {as_}-{hs} {home_cn}："
+            f"今天 {len(played)} 场，最狠的一刻出在{away_cn} {as_}-{hs} {home_cn}："
             f"{clutch['detail']}{extra}。"
         )
 
@@ -1259,12 +1261,15 @@ def clutch_text(g):
         return None
     player = cn_player(cl.get("player_en"), PLAYER_MAP) if cl.get("player_en") else ""
     who = player or "他"
+    # 没收录中文名的球员会显示英文，中英之间必须留空格，否则「Fears剩 7.3 秒」挤在一起
+    gap = "" if (who and "\u4e00" <= who[-1] <= "\u9fff") else " "
+    ot = "加时" if cl.get("overtime") else ""
     if cl["kind"] == "buzzer":
-        badge = "加时绝杀" if cl.get("overtime") else "绝杀"
-        detail = f"{who}压哨投进反超球"
+        badge = f"{ot}绝杀"
+        detail = f"{who}{gap}压哨投进反超球"
     else:
-        badge = "准绝杀"
-        detail = f"{who}剩 {_sec_text(cl['clock'])} 秒投进反超球，此后对手再没得分"
+        badge = f"{ot}准绝杀"
+        detail = f"{who}{gap}剩 {_sec_text(cl['clock'])} 秒投进反超球，此后对手再没得分"
     return {"badge": badge, "detail": detail}
 
 
