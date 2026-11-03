@@ -1,6 +1,6 @@
 {
   "game_date": "2026-11-02",
-  "generated_at": "2026-11-03T21:23:14+08:00",
+  "generated_at": "2026-11-03T21:36:14+08:00",
   "total_games": 15,
   "postseason": false,
   "headline": "鹈鹕 135-134 灰熊",
@@ -162,6 +162,7 @@
       "home_score": 112,
       "label": "今日最胶着",
       "series": null,
+      "overtimes": 0,
       "hook": "雷霆只赢 5 分，最后时刻才定胜负。",
       "drama": {
         "lead_changes": 19,
@@ -179,6 +180,7 @@
       "home_score": 91,
       "label": null,
       "series": null,
+      "overtimes": 0,
       "hook": "活塞最多领先 33 分，最终赢 33 分。",
       "drama": {
         "lead_changes": 7,
@@ -196,6 +198,7 @@
       "home_score": 104,
       "label": null,
       "series": null,
+      "overtimes": 0,
       "hook": "全场交替领先 4 次、打平 4 次，老鹰最后阶段才拉开 4 分。",
       "drama": {
         "lead_changes": 4,
@@ -213,6 +216,7 @@
       "home_score": 103,
       "label": null,
       "series": null,
+      "overtimes": 0,
       "hook": "尼克斯最多领先 16 分，最终赢 13 分。",
       "drama": {
         "lead_changes": 9,
@@ -230,6 +234,7 @@
       "home_score": 94,
       "label": null,
       "series": null,
+      "overtimes": 0,
       "hook": "全场交替领先 11 次、打平 12 次，奇才最后阶段才拉开 9 分。",
       "drama": {
         "lead_changes": 11,
@@ -247,6 +252,7 @@
       "home_score": 126,
       "label": null,
       "series": null,
+      "overtimes": 0,
       "hook": "76人最多领先 22 分，最终赢 19 分。",
       "drama": {
         "lead_changes": 4,
@@ -264,6 +270,7 @@
       "home_score": 100,
       "label": null,
       "series": null,
+      "overtimes": 0,
       "hook": "国王最多领先 19 分，最终赢 15 分。",
       "drama": {
         "lead_changes": 17,
@@ -281,6 +288,7 @@
       "home_score": 134,
       "label": null,
       "series": null,
+      "overtimes": 1,
       "hook": "全场交替领先 16 次、打平 8 次，鹈鹕最后阶段才拉开 1 分。",
       "drama": {
         "lead_changes": 16,
@@ -308,6 +316,7 @@
       "home_score": 112,
       "label": null,
       "series": null,
+      "overtimes": 0,
       "hook": "全场交替领先 5 次、打平 3 次，森林狼最后阶段才拉开 12 分。",
       "drama": {
         "lead_changes": 5,
@@ -325,6 +334,7 @@
       "home_score": 109,
       "label": "今日最平淡",
       "series": null,
+      "overtimes": 0,
       "hook": "火箭最多领先 18 分，最终赢 16 分。",
       "drama": {
         "lead_changes": 0,
@@ -342,6 +352,7 @@
       "home_score": 119,
       "label": null,
       "series": null,
+      "overtimes": 0,
       "hook": "马刺最多领先 26 分，最终赢 22 分。",
       "drama": {
         "lead_changes": 1,
@@ -359,6 +370,7 @@
       "home_score": 110,
       "label": null,
       "series": null,
+      "overtimes": 0,
       "hook": "开拓者一度落后 14 分，翻盘赢 8 分。",
       "drama": {
         "lead_changes": 3,
@@ -376,6 +388,7 @@
       "home_score": 116,
       "label": "今日最大逆转",
       "series": null,
+      "overtimes": 0,
       "hook": "勇士一度落后 17 分，翻盘赢 3 分。",
       "drama": {
         "lead_changes": 3,
@@ -393,6 +406,7 @@
       "home_score": 118,
       "label": null,
       "series": null,
+      "overtimes": 0,
       "hook": "猛龙一度落后 16 分，翻盘赢 7 分。",
       "drama": {
         "lead_changes": 1,
@@ -410,6 +424,7 @@
       "home_score": 138,
       "label": null,
       "series": null,
+      "overtimes": 0,
       "hook": "湖人最多领先 24 分，最终赢 21 分。",
       "drama": {
         "lead_changes": 1,

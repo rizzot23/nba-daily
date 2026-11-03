@@ -2048,6 +2048,11 @@ def main():
             "home_score": g["home"]["score"],
             "label": LABELS[labels[g["id"]]][0] if g["id"] in labels else None,
             "series": series_text(g),
+            # 加时数：单节比分表长度 - 4。头条素材里「加时」是个强钩子，单独存一份
+            "overtimes": max(
+                0,
+                max(len(g["home"].get("lines") or []), len(g["away"].get("lines") or [])) - 4,
+            ),
             "hook": build_hook(g, labels.get(g["id"]) == "drama"),
             "drama": {
                 "lead_changes": (g.get("drama") or {}).get("lead_changes", 0),
@@ -2072,6 +2077,13 @@ def main():
         cover_mod.build()
     except Exception as e:
         print(f"  封面图跳过：{e}")
+
+    # 头条素材同理：单独一份给头条用的选题稿，失败不影响战报
+    try:
+        import export_toutiao
+        export_toutiao.main()
+    except Exception as e:
+        print(f"  头条素材跳过：{e}")
     return 0
 
 
