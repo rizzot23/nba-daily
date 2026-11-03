@@ -1064,10 +1064,14 @@ def watch_ok(g, margin):
 
     「好看」只认能拿数据复核的四类：最后一球定胜负、加时、两位数逆转、
     最后时刻还在一个球以内。主观的"精彩"一律不算——没有标准就会场场都推。
+
+    故意不收「末节贴着打」：4 分球但整节谁也没真追上，读完理由也提不起
+    兴趣，列出来只是凑数。宁可只推一场，也不拿平淡场把位置占满。
+    分差四五分但领先换了十几回的另算——那是真的你来我往，不是拖着不动。
     """
     dr = g.get("drama") or {}
     if not dr.get("ok"):
-        return margin <= 5          # 没有逐回合数据时只能看分差
+        return margin <= 3          # 没有逐回合数据时只能看分差
     if dr.get("clutch"):
         return True
     if overtimes(g):
@@ -1076,9 +1080,9 @@ def watch_ok(g, margin):
         return True
     if margin <= 3:
         return True
-    close = dr.get("close_seconds") or 0
-    # 分差拉开过，但末节长时间贴着打——看了不亏
-    return (margin <= 6 and close >= 180) or (margin <= 10 and close >= 360)
+    # 交替领先多，但最后赢十几分，说明后半段早拉开了——理由写"交替领先"
+    # 会让人以为看了一场平局，对不上比分。分差放这么宽的才收。
+    return (dr.get("lead_changes") or 0) >= 12 and margin <= 8
 
 
 def watch_rank(g):
@@ -1095,15 +1099,15 @@ def watch_rank(g):
 def watch_reason(g, margin):
     """一句话理由。只讲最抓人的那一件，不把四个数据点堆成一句话。
 
-    顺序按「信息量」排，不按数据算出来的先后：一场 4 分球如果末节整节
-    都没拉开，写"末节没拉开"比写"打平 4 次"有用得多。
+    顺序按「信息量」排，不按数据算出来的先后：绝杀 > 最后时刻反超 >
+    加时 > 两位数翻盘 > 最后一球 > 反复易手。准入已经把平淡场挡在外面，
+    所以这里不需要"末节没拉开"这类凑数理由。
     """
     dr = g.get("drama") or {}
     cl = dr.get("clutch")
     ot = overtimes(g)
     cb = dr.get("comeback") or 0
     lc = dr.get("lead_changes") or 0
-    close = dr.get("close_seconds") or 0
     f2 = dr.get("final2_max_diff")
 
     if cl and cl.get("kind") == "buzzer":
@@ -1118,10 +1122,6 @@ def watch_reason(g, margin):
         return "最后两分钟没超过一个球"
     if lc >= 12:
         return f"交替领先 {lc} 次"
-    if close >= 480:
-        return "末节整节没拉开"
-    if close >= 240:
-        return "末节大半节贴着打"
     return f"只差 {margin} 分"
 
 
@@ -1145,7 +1145,11 @@ def pick_watchable(played, skip_id=None):
 
 
 def render_watchable(picks):
-    """推荐比赛：给只看一两场的人一个入口。没有够格的就整块不出。"""
+    """推荐比赛：给只看一两场的人一个入口。没有够格的就整块不出。
+
+    标题写「其它推荐比赛」：导语那场已经在页面上讲过了，这里的都是
+    除它之外另外值得看的，免得读者以为把头条那场又推了一遍。
+    """
     if not picks:
         return ""
 
@@ -1176,7 +1180,7 @@ def render_watchable(picks):
     return (
         f'<div style="margin:0 0 24px;">'
         f'<div style="font-size:11px;color:#9a9a9a;letter-spacing:2px;margin-bottom:2px;'
-        f'font-family:{FONT};">推荐比赛</div>'
+        f'font-family:{FONT};">其它推荐比赛</div>'
         f'{"".join(rows)}'
         f'</div>'
     )
