@@ -1,0 +1,23 @@
+{
+  "brand": {
+    "name_zh": "去球吧",
+    "name_en": "QUQIBA",
+    "tagline": "NBA 每日战报"
+  },
+  "palette": {
+    "primary":    "#CE9A6E",
+    "structural": "#16131B",
+    "accent":     "#984B41",
+    "panel":      "#F3F0E8"
+  },
+  "canvas": 100,
+  "min_size_px": 24,
+  "motif": [
+    {"type": "ellipse", "cx": 33, "cy": 28.5, "rx": 18, "ry": 11.7,
+     "fill": "none", "stroke": "structural", "width": 4.2},
+    {"type": "circle", "cx": 64, "cy": 64, "r": 17, "fill": "primary"},
+    {"type": "line", "x1": 12, "y1": 81, "x2": 88, "y2": 81,
+     "stroke": "structural", "width": 3.2, "cap": "butt"}
+  ],
+  "notes": "Derived from brand/reference.png: rim ellipse 1.54:1 at (-0.21W,-0.20H), ball d=0.36W at (+0.18W,+0.17H), floor line tangent to ball base."
+}

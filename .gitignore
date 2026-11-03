@@ -14,3 +14,7 @@ venv/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# 品牌字体（得意黑，4.5MB，按 brand/README.md 重新下载即可）
+brand/fonts/*.ttf
+brand/fonts/*.otf

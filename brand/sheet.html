@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>去球吧 · 标志规范</title>
+<style>
+@font-face{font-family:"SmileySans";src:url("fonts/SmileySans-Oblique.ttf") format("truetype");font-display:swap}
+:root{
+  --wood:#CE9A6E; --ink:#16131B; --brick:#984B41; --panel:#F3F0E8;
+  --mute:#7C7168; --line:#DED8CB;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--panel);color:var(--ink);
+  font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.75;-webkit-font-smoothing:antialiased}
+.wrap{max-width:920px;margin:0 auto;padding:56px 40px 90px}
+
+header{border-bottom:1px solid var(--line);padding-bottom:28px;margin-bottom:44px}
+h1{font-family:"SmileySans",inherit;margin:0;font-size:46px;letter-spacing:.04em;font-weight:400}
+h1 small{display:block;font-size:13px;letter-spacing:.34em;color:var(--mute);
+  margin-top:10px;font-family:ui-monospace,Menlo,monospace}
+.lead{margin:18px 0 0;font-size:15px;color:#4a423b;max-width:600px}
+
+h2{font-family:"SmileySans",inherit;font-size:18px;letter-spacing:.10em;margin:56px 0 6px;padding-bottom:10px;
+  border-bottom:1px solid var(--line);font-weight:400}
+h2 em{font-style:normal;color:var(--mute);font-size:12px;margin-left:12px;letter-spacing:.06em}
+p.note{font-size:13.5px;color:var(--mute);margin:10px 0 22px}
+
+.hero{display:flex;gap:44px;align-items:center;flex-wrap:wrap;margin:6px 0 8px}
+.hero img{width:220px;height:220px;border-radius:50%;flex:none}
+.hero .kp{font-size:13.5px;color:#4a423b}
+.hero .kp b{font-weight:400;color:var(--ink)}
+
+table{width:100%;border-collapse:collapse;font-size:13.5px;background:#fff}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid #EDE8DC;vertical-align:top}
+th{background:#EFEADF;font-weight:400;color:#5C5248;letter-spacing:.04em}
+td code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:#F6F2E9;
+  padding:1px 5px;border-radius:3px}
+tr:last-child td{border-bottom:none}
+
+.variants{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:18px}
+.variants figure{margin:0;background:#fff;border:1px solid var(--line);padding:24px 18px 14px;text-align:center}
+.variants .dark{background:var(--ink)}
+.variants .dark figcaption{color:#9d9187}
+.variants svg{width:104px;height:104px;display:block;margin:0 auto 12px}
+.variants figcaption{font-size:12.5px;color:var(--mute);letter-spacing:.05em}
+
+.avs{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:16px}
+.av{background:#fff;border:1px solid var(--line);padding:22px;display:flex;gap:20px;align-items:center}
+.av img{width:104px;height:104px;border-radius:50%;flex:none}
+.av div{font-size:13px;color:#4a423b}
+.av b{display:block;font-size:14.5px;color:var(--ink);font-weight:400;margin-bottom:4px}
+
+.shot{width:100%;border:1px solid var(--line);background:#fff;margin-top:14px}
+
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+.cols .swatch{height:64px;border:1px solid var(--line);display:flex;align-items:flex-end;
+  padding:7px 9px;font-size:11px;font-family:ui-monospace,monospace}
+
+ul{margin:10px 0 0;padding-left:20px;font-size:13.5px}
+li{margin:7px 0}
+li b{font-weight:400;color:var(--brick)}
+footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);
+  font-size:12px;color:var(--mute);display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>去球吧<small>QUQIBA · BRAND MARK</small></h1>
+  <p class="lead">标志从一张真实照片里量出来，不是画出来的。照片里有两件事：一颗落在木地板上的球，和远处一个失焦的篮筐。整个标志只保留这两件东西和它们脚下的那条线。</p>
+</header>
+
+<h2>01 主形象<em>PRIMARY MARK</em></h2>
+<div class="hero">
+  <img src="out/avatar-wood-640.png" alt="去球吧 头像">
+  <div class="kp">
+    环代表篮筐，字代表球，横线代表地板。<br>
+    「球」字不是贴上去的名字，它<b>就是那颗球</b>——位置、体量、落地关系全部照搬照片。<br>
+    缩到 48px，字会糊，但轮廓仍是一个落在环下的实心块，读起来还是「球在筐下」。
+  </div>
+</div>
+
+<h2>02 参考视觉与实测<em>DERIVATION</em></h2>
+<p class="note">下表每一项都能在参考图里量出来，不是感觉。</p>
+<table>
+  <tr><th style="width:26%">空间事实</th><th style="width:32%">实测值</th><th>进入标志的部分</th></tr>
+  <tr><td>两主体位置</td><td>球心 +0.18W / +0.17H，圈心 −0.21W / −0.20H</td><td>近乎绕画心镜像 → 球右下、圈左上的斜线</td></tr>
+  <tr><td>球体尺度</td><td>直径 0.36W（画面宽）</td><td>球/字占画布 40 单位</td></tr>
+  <tr><td>篮圈形状</td><td>外接 203×132px = <code>1.54:1</code> 扁椭圆</td><td>环的 rx:ry 严格照此比例</td></tr>
+  <tr><td>地面</td><td>暖木色占画面下三分之一，上部近黑</td><td>一条与球底相切的横线</td></tr>
+  <tr><td>景深（球实、圈虚）</td><td>—</td><td><b>丢弃</b>：模糊画不出来，硬做就是滤镜</td></tr>
+  <tr><td>篮网垂直细线</td><td>约 10 根，向下收拢</td><td><b>丢弃</b>：24px 下必然粘连成块</td></tr>
+  <tr><td>球面接缝</td><td>两弧交于一点</td><td><b>丢弃</b>：同上，且与字冲突</td></tr>
+</table>
+
+<h2>03 三个版本<em>VARIANTS</em></h2>
+<div class="variants">
+  <figure>
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="33" cy="28.5" rx="18" ry="11.7" fill="none" stroke="#16131B" stroke-width="4.2"/>
+      <circle cx="64" cy="64" r="17" fill="#CE9A6E"/>
+      <line x1="12" y1="81" x2="88" y2="81" stroke="#16131B" stroke-width="3.2"/>
+    </svg>
+    <figcaption>标准版 · 浅底用</figcaption>
+  </figure>
+  <figure>
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="33" cy="28.5" rx="18" ry="11.7" fill="none" stroke="#16131B" stroke-width="4.2"/>
+      <circle cx="64" cy="64" r="17" fill="#16131B"/>
+      <line x1="12" y1="81" x2="88" y2="81" stroke="#16131B" stroke-width="3.2"/>
+    </svg>
+    <figcaption>单色版 · 烫印 / 单色印刷</figcaption>
+  </figure>
+  <figure class="dark">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="33" cy="28.5" rx="18" ry="11.7" fill="none" stroke="#F3F0E8" stroke-width="4.2"/>
+      <circle cx="64" cy="64" r="17" fill="#CE9A6E"/>
+      <line x1="12" y1="81" x2="88" y2="81" stroke="#F3F0E8" stroke-width="3.2"/>
+    </svg>
+    <figcaption>反白版 · 深底用</figcaption>
+  </figure>
+</div>
+
+<h2>04 两个头像<em>AVATAR</em></h2>
+<p class="note">公众号和头条号共用同一张，两个平台都是圆形裁切，没有差异。木底那版字更清楚，深底那版在白色信息流里更显眼。</p>
+<div class="avs">
+  <div class="av">
+    <img src="out/avatar-wood-640.png" alt="木底">
+    <div><b>木底 · 推荐</b>黑字压木色，内部对比 7.7:1。32px 时还能看出是「球」，深底那版此时已糊成一块。</div>
+  </div>
+  <div class="av">
+    <img src="out/avatar-640.png" alt="深底">
+    <div><b>深底 · 备选</b>白底列表里更跳，但 32px 时字会糊进背景。适合头像旁边不放名字的场景。</div>
+  </div>
+</div>
+
+<h2>05 缩到多小还成立<em>SCALE TEST</em></h2>
+<img class="shot" src="dist/scale-test.png" alt="尺寸测试">
+<p class="note">24px 起环与球仍可分辨，16px 只剩球的轮廓——favicon 用纯色块即可，不必再简化。</p>
+
+<h2>06 色彩<em>COLOR</em></h2>
+<div class="cols">
+  <div>
+    <div class="swatch" style="background:#CE9A6E;color:#3a2b1d">#CE9A6E · 球场木</div>
+    <div class="swatch" style="background:#16131B;color:#CE9A6E;margin-top:8px">#16131B · 墨黑</div>
+    <div class="swatch" style="background:#984B41;color:#f4e7e2;margin-top:8px">#984B41 · 砖橙</div>
+  </div>
+  <table style="font-size:12.5px">
+    <tr><th>动作</th><th>公众号</th><th>头条号</th></tr>
+    <tr><td>头像</td><td><code>avatar-640.png</code></td><td>同左</td></tr>
+    <tr><td>正文页眉</td><td><code>lockup.png</code></td><td><code>lockup.png</code></td></tr>
+    <tr><td>封面角标</td><td><code>mark-reverse-512.png</code></td><td>—</td></tr>
+  </table>
+</div>
+<p class="note">砖橙刻意不进标志。它在木色底上只有 2.4:1，放进去只会让 24px 版本多一块糊掉的色。留作头条封面横幅用。</p>
+
+<h2>07 规矩<em>USAGE</em></h2>
+<ul>
+  <li>净空 = 3.2 单位（等于地线线宽），四周不得压字、压图、压边框。</li>
+  <li>最小尺寸 24px。低于此只能用单色版，且不带头像底板。</li>
+  <li><b>禁止</b>旋转、加阴影、加渐变、改环的扁度（1.54:1 是量出来的，不是随手定的）。</li>
+  <li><b>禁止</b>把「球」字换成其他字——它替代的是球，不是标题。</li>
+  <li>字号：字标用得意黑（SIL OFL 1.1，可商用），不要换成微软雅黑——Windows 字体授权不覆盖标志用途。</li>
+</ul>
+
+<footer>
+  <span>去球吧 · 标志规范</span>
+  <span>2026-11-03</span>
+</footer>
+
+</div>
+</body>
+</html>
