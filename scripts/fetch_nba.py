@@ -1050,7 +1050,9 @@ def render_focus(items):
 
 # ---------------------------------------------------------------- 推荐比赛
 
-WATCH_MAX = 3        # 最多推荐几场。再多就不叫"推荐"，叫第二份赛果清单了
+# 值得看的就都写出来，不人为砍到三场——好球多的日子砍掉一场都是浪费。
+# 10 只是个安全阀：收官日 30 队同天开打，万一全都够格，推荐块会比正文还长。
+WATCH_MAX = 10
 
 
 def overtimes(g):
@@ -2106,10 +2108,20 @@ def main():
 
     print("[3/5] 生成分差走势图")
     OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    # 只给值得看的场次配图：导语讲的那场 + 推荐列表里的全部。
+    # 其余场次卡片照留，但没有走势图——一张图的高度顶得上三行比分，
+    # 平平淡淡的场次配张图，除了把页面拖长没别的作用。
+    played = [g for g in games if g.get("finished")]
+    head = pick_headline(played)
+    chart_ids = {g["id"] for g, _ in pick_watchable(played, head["id"] if head else None)}
+    if head:
+        chart_ids.add(head["id"])
+
     made = 0
     for g in games:
         series = (g.get("drama") or {}).get("series") or []
-        if not series:
+        if not series or g["id"] not in chart_ids:
             continue
         rel = f"charts/{g['id']}.png"
         try:
@@ -2118,7 +2130,7 @@ def main():
             made += 1
         except Exception as e:  # 图挂了不能影响出稿
             print(f"  场次 {g['id']} 走势图生成失败：{e}")
-    print(f"  共 {made} 张")
+    print(f"  共 {made} 张（{len(played)} 场里只给值得看的配图）")
 
     # 清掉历史遗留的图，避免仓库里越堆越多
     keep = {f"{g['id']}.png" for g in games if g.get("chart")}
