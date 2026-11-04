@@ -1146,45 +1146,11 @@ def pick_watchable(played, skip_id=None):
     return [(g, watch_reason(g, m)) for g, m in picks[:WATCH_MAX]]
 
 
-def render_watchable(picks):
-    """推荐比赛：给只看一两场的人一个入口。没有够格的就整块不出。
-
-    标题写「其它推荐比赛」：导语那场已经在页面上讲过了，这里的都是
-    除它之外另外值得看的，免得读者以为把头条那场又推了一遍。
-    """
-    if not picks:
-        return ""
-
-    rows = []
-    for g, reason in picks:
-        hs, as_ = g["home"]["score"], g["away"]["score"]
-        home_cn = cn_team(g["home"]["name_en"], TEAM_MAP)
-        away_cn = cn_team(g["away"]["name_en"], TEAM_MAP)
-        # 胜方比分上色，扫一眼就知道谁赢，不用去比两个数字
-        aw = (f"font-weight:700;color:{COLOR_ACCENT};" if as_ > hs
-              else f"color:{COLOR_TEXT};")
-        hw = (f"font-weight:700;color:{COLOR_ACCENT};" if hs > as_
-              else f"color:{COLOR_TEXT};")
-        rows.append(
-            f'<div style="font-size:13px;line-height:2.2;color:{COLOR_TEXT};'
-            f'font-family:{FONT};">'
-            f'<span>{esc(away_cn)}</span>'
-            f'<span style="{aw}padding:0 5px;">{as_}</span>'
-            f'<span style="color:#d4d4d4;">-</span>'
-            f'<span style="{hw}padding:0 5px;">{hs}</span>'
-            f'<span>{esc(home_cn)}</span>'
-            f'<span style="font-size:11px;color:#e0e0e0;padding:0 8px;">·</span>'
-            f'<span style="font-size:12px;color:#9a9a9a;">'
-            f'{esc(reason)}</span>'
-            f'</div>'
-        )
-
+def render_section(title):
+    """区段小标题。十几张卡片连排时靠它分段，比加粗细线省地方也清楚。"""
     return (
-        f'<div style="margin:0 0 24px;">'
-        f'<div style="font-size:11px;color:#9a9a9a;letter-spacing:2px;margin-bottom:2px;'
-        f'font-family:{FONT};">其它推荐比赛</div>'
-        f'{"".join(rows)}'
-        f'</div>'
+        f'<div style="margin:28px 0 4px;font-size:11px;color:#9a9a9a;'
+        f'letter-spacing:2px;font-family:{FONT};">{esc(title)}</div>'
     )
 
 
@@ -1606,7 +1572,7 @@ def render_folded(games):
     )
 
 
-def render_game(g, label_key=None, highlight=None):
+def render_game(g, label_key=None, highlight=None, watch_note=None):
     home, away = g["home"], g["away"]
     hs, as_ = home["score"], away["score"]
     home_win = hs is not None and as_ is not None and hs > as_
@@ -1650,6 +1616,13 @@ def render_game(g, label_key=None, highlight=None):
         )
         parts.append(
             f'<div style="margin:0 0 8px 0;">{"".join(badges)}{detail}</div>'
+        )
+    elif watch_note:
+        # 排进推荐区但没有抢到标签的场次，用一句话交代它凭什么排前面。
+        # 有标签的不写，否则「今日最大逆转」下面再挂「落后 17 分翻盘」就是同一句话说两遍。
+        parts.append(
+            f'<div style="margin:0 0 8px 0;font-size:11px;color:{COLOR_ACCENT};'
+            f'letter-spacing:1px;font-family:{FONT};">值得看 · {esc(watch_note)}</div>'
         )
 
     # 顶部队名 + 比分
@@ -1997,22 +1970,63 @@ def render_page(games, game_date, display_date, tomorrow=None):
     best_act = best[1] if best else None
 
     if total:
-        # 常规赛收官日会让 30 队同一天打完，全展开的话页面长度翻倍。
-        # 超过 MAX_DETAIL 场就把激烈度最低的那些压成一行比分，其余照常详写。
-        detail, folded = played, []
-        if total > MAX_DETAIL:
-            keep_ids = {
-                g["id"] for g in sorted(
-                    played, key=lambda x: -((x.get("drama") or {}).get("score") or 0)
-                )[:MAX_DETAIL]
-            }
-            detail = [g for g in played if g["id"] in keep_ids]   # 保持开球时间顺序
-            folded = [g for g in played if g["id"] not in keep_ids]
+        # 版面顺序：值得看的排前面，标题那场放第一个；其余按开球时间跟在后面。
+        # 不再单独做一份「其它推荐比赛」的行式清单——同一场比赛在页面上
+        # 出现两次，读者会觉得你在凑篇幅。
+        picks = pick_watchable(played, head_id)
+        reasons = {g["id"]: r for g, r in picks}
+        if head:
+            reasons[head["id"]] = watch_reason(
+                head, abs(head["home"]["score"] - head["away"]["score"])
+            )
 
-        blocks = "".join(
-            render_game(g, labels.get(g["id"]), best_act if g["id"] == best_id else None)
-            for g in detail
-        )
+        feat_ids = []
+        for i in ([head_id] if head_id else []) + [g["id"] for g, _ in picks]:
+            if i and i not in feat_ids:
+                feat_ids.append(i)
+        feat_set = set(feat_ids)
+        by_id = {g["id"]: g for g in played}
+        featured = [by_id[i] for i in feat_ids if i in by_id]   # 标题场 + 推荐场，按好看程度
+        others = [g for g in played if g["id"] not in feat_set]  # 其余按开球时间
+
+        # 常规赛收官日会让 30 队同一天打完，全展开页面长度翻倍。超过上限时
+        # 先保证推荐场都在，剩下的名额按时间顺序给其余场次，多出来的压成一行。
+        ordered = featured + others
+        detail, folded = ordered[:MAX_DETAIL], ordered[MAX_DETAIL:]
+        detail_ids = {g["id"] for g in detail}
+        feat_detail = [g for g in featured if g["id"] in detail_ids]
+        other_detail = [g for g in others if g["id"] in detail_ids]
+
+        # 最平淡兜底：其余场次里挑一场标出来，让读者知道哪场可以跳过。
+        # assign_labels 的条件偏严（分差上双 + 末节几乎没缠斗），有些日子
+        # 一场都挑不出来；那样读者就完全看不出哪场不值得点开。
+        if other_detail and "flat" not in labels.values():
+            cand = [
+                g for g in other_detail
+                if g["id"] not in labels
+                and abs(g["home"]["score"] - g["away"]["score"]) >= 8
+            ]
+            if cand:
+                worst = min(cand, key=lambda g: (g.get("drama") or {}).get("score") or 0)
+                labels[worst["id"]] = "flat"
+
+        blocks = ""
+        if feat_detail:
+            blocks += render_section("推荐比赛")
+            blocks += "".join(
+                render_game(
+                    g, labels.get(g["id"]),
+                    best_act if g["id"] == best_id else None,
+                    reasons.get(g["id"]),
+                )
+                for g in feat_detail
+            )
+        if other_detail:
+            blocks += render_section(f"其余 {len(other_detail)} 场")
+            blocks += "".join(
+                render_game(g, labels.get(g["id"]), best_act if g["id"] == best_id else None)
+                for g in other_detail
+            )
         if folded:
             blocks += render_folded(folded)
     else:
@@ -2048,8 +2062,6 @@ def render_page(games, game_date, display_date, tomorrow=None):
   </div>
 
   {render_focus(build_focus(games))}
-
-  {render_watchable(pick_watchable(played, head_id))}
 
   {blocks}
 
@@ -2108,20 +2120,10 @@ def main():
 
     print("[3/5] 生成分差走势图")
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-
-    # 只给值得看的场次配图：导语讲的那场 + 推荐列表里的全部。
-    # 其余场次卡片照留，但没有走势图——一张图的高度顶得上三行比分，
-    # 平平淡淡的场次配张图，除了把页面拖长没别的作用。
-    played = [g for g in games if g.get("finished")]
-    head = pick_headline(played)
-    chart_ids = {g["id"] for g, _ in pick_watchable(played, head["id"] if head else None)}
-    if head:
-        chart_ids.add(head["id"])
-
     made = 0
     for g in games:
         series = (g.get("drama") or {}).get("series") or []
-        if not series or g["id"] not in chart_ids:
+        if not series:
             continue
         rel = f"charts/{g['id']}.png"
         try:
@@ -2130,7 +2132,7 @@ def main():
             made += 1
         except Exception as e:  # 图挂了不能影响出稿
             print(f"  场次 {g['id']} 走势图生成失败：{e}")
-    print(f"  共 {made} 张（{len(played)} 场里只给值得看的配图）")
+    print(f"  共 {made} 张")
 
     # 清掉历史遗留的图，避免仓库里越堆越多
     keep = {f"{g['id']}.png" for g in games if g.get("chart")}
