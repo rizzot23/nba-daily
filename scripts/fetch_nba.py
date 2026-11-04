@@ -1041,9 +1041,8 @@ def render_focus(items):
 
     return (
         f'<div style="margin:0 0 24px;">'
-        f'<div style="font-size:11px;color:#9a9a9a;letter-spacing:2px;margin-bottom:2px;'
-        f'font-family:{FONT};">焦点球星</div>'
-        f'{"".join(rows)}'
+        + render_section("焦点球星", f"{len(rows)} 人", top=4)
+        + f'{"".join(rows)}'
         f'</div>'
     )
 
@@ -1146,11 +1145,25 @@ def pick_watchable(played, skip_id=None):
     return [(g, watch_reason(g, m)) for g, m in picks[:WATCH_MAX]]
 
 
-def render_section(title):
-    """区段小标题。十几张卡片连排时靠它分段，比加粗细线省地方也清楚。"""
+def render_section(title, note="", top=30):
+    """区段标题：左边一道橙条 + 加粗黑字，扫读时能当锚点直接跳。
+
+    只加竖条不加底色——公众号编辑器里整块背景容易和下面的卡片糊成一片，
+    而且复制粘贴后底色被压扁的情况很常见。右侧的灰字放口径（几场、按什么排），
+    不放形容词。
+    """
+    note_html = (
+        f'<span style="font-size:11px;color:#b0b0b0;font-weight:normal;'
+        f'letter-spacing:0;padding-left:9px;">{esc(note)}</span>' if note else ""
+    )
     return (
-        f'<div style="margin:28px 0 4px;font-size:11px;color:#9a9a9a;'
-        f'letter-spacing:2px;font-family:{FONT};">{esc(title)}</div>'
+        f'<div style="margin:{top}px 0 10px;font-family:{FONT};">'
+        f'<span style="display:inline-block;width:3px;height:15px;background:{COLOR_ACCENT};'
+        f'vertical-align:-2px;margin-right:9px;"></span>'
+        f'<span style="font-size:15px;font-weight:bold;color:{COLOR_TEXT};'
+        f'letter-spacing:1px;">{esc(title)}</span>'
+        f'{note_html}'
+        f'</div>'
     )
 
 
@@ -2012,7 +2025,7 @@ def render_page(games, game_date, display_date, tomorrow=None):
 
         blocks = ""
         if feat_detail:
-            blocks += render_section("推荐比赛")
+            blocks += render_section("推荐比赛", f"{len(feat_detail)} 场")
             blocks += "".join(
                 render_game(
                     g, labels.get(g["id"]),
@@ -2022,7 +2035,9 @@ def render_page(games, game_date, display_date, tomorrow=None):
                 for g in feat_detail
             )
         if other_detail:
-            blocks += render_section(f"其余 {len(other_detail)} 场")
+            blocks += render_section(
+                f"其余 {len(other_detail)} 场", "按开球时间", top=34
+            )
             blocks += "".join(
                 render_game(g, labels.get(g["id"]), best_act if g["id"] == best_id else None)
                 for g in other_detail
