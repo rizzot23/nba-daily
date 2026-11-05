@@ -896,7 +896,20 @@ def build_lead(games):
     # 说「最狠的一场」会和下面挂的「今日最胶着」徽章互相打脸
     clutch = clutch_text(head)
     if clutch:
-        extra = f"，全场交替领先 {lc} 次" if lc else ""
+        # 绝杀场不能只写那一球。11-04 热火落后 20 分、加时压哨翻盘，
+        # 原句却补了句「交替领先 8 次」——这是全天最好的一场，
+        # 却把最弱的那个数据当成了背景，等于把素材扔了。
+        cb = dr.get("comeback") or 0
+        ot = overtimes(head)
+        tail_bits = []
+        if cb >= 12:
+            tail_bits.append(f"一度落后 {cb} 分")
+        if ot:
+            tail_bits.append("多打一个加时" if ot == 1 else f"多打 {ot} 个加时")
+        if tail_bits:
+            extra = "，他们" + "、".join(tail_bits)
+        else:
+            extra = f"，全场交替领先 {lc} 次" if lc else ""
         return (
             f"今天 {len(played)} 场，最狠的一刻出在{away_cn} {as_}-{hs} {home_cn}："
             f"{clutch['detail']}{extra}。"
@@ -1523,6 +1536,9 @@ def _player_chip(p):
     )
 
     return (
+        # 整个「名字 分数 板助」包一层 nowrap：中文默认可以在任意字间断行，
+        # 窄屏上出现过「字母哥」被拆成「字」和「母哥」两行，读起来像打错字。
+        f'<span style="white-space:nowrap;">'
         f'<span style="font-size:13px;line-height:2.0;color:#2b2b2b;font-weight:700;'
         f'font-family:{FONT};">{esc(name)}</span>'
         f'<span style="font-size:16px;line-height:2.0;color:{COLOR_ACCENT};font-weight:700;'
@@ -1530,6 +1546,7 @@ def _player_chip(p):
         f'<span style="font-size:12px;line-height:2.0;color:{COLOR_ACCENT};'
         f'font-family:{FONT};padding-right:6px;">分</span>'
         f'{extra_html}'
+        f'</span>'
     )
 
 

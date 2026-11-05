@@ -209,11 +209,14 @@ def build():
     draw.text((W / 2 + gap, score_top), hsc, font=big, fill=INK)
 
     colon = ":"
-    cb = ink_box(colon, big)
+    # 别用 cb 这个名字：上面 bar_pair 的 cb 是主队色条的颜色，
+    # 这里一旦覆盖成 bbox 元组，底部色带的 fill 就变成坐标数字了
+    # （11-04 的封面右下角因此渲染成一块墨绿色，跟快船毫无关系）
+    cbox = ink_box(colon, big)
     cw = draw.textlength(colon, big)
     # 冒号在两块数字的着墨中线上居中，不是按 ascender 中线
     mid = (ab[1] + ab[3]) / 2
-    draw.text(((W - cw) / 2, score_top + mid - (cb[1] + cb[3]) / 2),
+    draw.text(((W - cw) / 2, score_top + mid - (cbox[1] + cbox[3]) / 2),
               colon, font=big, fill=COLON)
 
     # 队名贴在自家比分下沿，同一条竖线上对齐

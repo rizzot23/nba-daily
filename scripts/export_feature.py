@@ -190,7 +190,12 @@ def titles_toutiao(g):
         when = when_of(cl)
         out.append(tidy(f'{when}剩 {sec} 秒反超，{vs(g)}'))
         out.append(tidy(f'{vs(g)}，胜负定在最后 {sec} 秒'))
-        out.append(tidy(f'{dr.get("lead_changes") or 0} 次交替领先，最后 {sec} 秒才分出'))
+        # 既有两位数逆转又有绝杀时，逆转比「N 次交替领先」有信息量。
+        # 11-04 热火落后 20 分翻盘，第三条原写「8 次交替领先」，把最好的素材丢了
+        if cb >= 12:
+            out.append(tidy(f'{w}落后 {cb} 分，{when}最后 {sec} 秒翻盘'))
+        else:
+            out.append(tidy(f'{dr.get("lead_changes") or 0} 次交替领先，最后 {sec} 秒才分出'))
     elif cb >= 12:
         out.append(tidy(f'{w}落后 {cb} 分，最后赢 {m} 分'))
         out.append(tidy(f'{l}领先 {cb} 分，被{w}翻了'))
@@ -222,8 +227,11 @@ def titles_wechat(g):
         who = player_cn(cl.get("player_en")) or "他"
         before = cl.get("before") or 0
         if before < 0:
-            out.append(f'{w}落后 {-before} 分，最后 {sec} 秒翻了')
-            out.append(f'还剩 {sec} 秒，落后 {-before} 分，{sp(who, "把球投进")}')
+            # -before 只是最后一回合的分差。全场落后过两位数时写「落后 2 分」，
+            # 读者会以为这是场势均力敌的球，把最狠的情节藏掉了
+            lead = cb if cb >= 12 else -before
+            out.append(f'{w}落后 {lead} 分，最后 {sec} 秒翻了')
+            out.append(f'{when}还剩 {sec} 秒，{sp(who, "把球投进")}')
             out.append(f'{l}领先到最后一个回合，然后输了')
         else:
             out.append(f'还剩 {sec} 秒，两队打平，{sp(who, "把球投进")}')
@@ -246,8 +254,16 @@ def digest(g):
     dr = g.get("drama") or {}
     cl = dr.get("clutch")
     if cl:
+        cb = dr.get("comeback") or 0
+        sec = sec_text(cl.get("clock"))
+        when = when_of(cl)
+        # 落后两位数再绝杀，写「从头到尾没松过」是自相矛盾的：
+        # 落后 20 分那段就是松了。有逆转就把逆转放前面
+        if cb >= 12:
+            return tidy(f'落后 {cb} 分翻过来，{when}剩 {sec} 秒才完成反超。',
+                        limit=54) or f'{vs(g)}'
         return tidy(
-            f'{when_of(cl)}剩 {sec_text(cl.get("clock"))} 秒才反超，'
+            f'{when}剩 {sec} 秒才反超，'
             f'{dr.get("lead_changes") or 0} 次交替领先，这场从头到尾没松过。',
             limit=54,
         ) or f'{vs(g)}'
