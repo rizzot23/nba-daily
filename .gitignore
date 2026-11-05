@@ -18,3 +18,7 @@ desktop.ini
 # 品牌字体（得意黑，4.5MB，按 brand/README.md 重新下载即可）
 brand/fonts/*.ttf
 brand/fonts/*.otf
+
+# 内部方案文档：只保留本地副本，不进公开仓库（构建与 Pages 都不依赖它们）
+/产品方案.html
+/公众号运营方案.html
