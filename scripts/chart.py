@@ -80,7 +80,8 @@ def score_chart(series, out_path, width=1200, height=400,
                 period_marks=(720, 1440, 2160)):
     """series: [(elapsed_seconds, home_score, away_score), ...]，按时间升序。
 
-    两条累计得分曲线：橙 = 主队，蓝 = 客队。纵轴 0→最高分，横轴为比赛进程。
+    两条累计得分曲线：砖红 = 主队，蓝 = 客队。纵轴 0→最高分，横轴为比赛进程。
+    这两个色会通过 CHART_*_HEX 一路用到卡片顶部的大比分和图例上。
     """
     if not series:
         return None

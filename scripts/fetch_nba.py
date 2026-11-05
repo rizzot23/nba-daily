@@ -1620,10 +1620,15 @@ def render_game(g, label_key=None, highlight=None, watch_note=None):
             f"font-weight:{'bold' if is_winner else 'normal'};"
         )
 
-    def score_style(is_winner):
+    def score_style(line_color):
+        # 大比分直接染成走势图里那条线的颜色。图例在图下方，看图时读者
+        # 已经滑过去了；把颜色前置到比分上，看到「左边蓝、右边砖红」再
+        # 看曲线就知道哪条是谁，不用折回去找图例。
+        # 谁赢不靠比分颜色判断——队名那边仍是胜方深色加粗、负方灰，
+        # 两个维度分开，染色才不会把胜负信息盖掉。
         return (
             f"font-size:24px;line-height:1.2;text-align:center;padding:2px 0;"
-            f"color:{COLOR_TEXT if is_winner else '#a8a8a8'};font-weight:bold;"
+            f"color:{line_color};font-weight:bold;"
         )
 
     parts = []
@@ -1665,9 +1670,9 @@ def render_game(g, label_key=None, highlight=None, watch_note=None):
 <table style="width:100%;border-collapse:collapse;table-layout:fixed;margin:0;font-family:{FONT};">
   <tr>
     <td style="{side_style(away_win, 'right')}width:36%;">{esc(cn_team(away["name_en"], TEAM_MAP))}</td>
-    <td style="{score_style(away_win)}width:12%;">{esc(as_ if as_ is not None else '-')}</td>
+    <td style="{score_style(CHART_AWAY_HEX)}width:12%;">{esc(as_ if as_ is not None else '-')}</td>
     <td style="width:5%;text-align:center;font-size:11px;color:#dcdcdc;">:</td>
-    <td style="{score_style(home_win)}width:12%;">{esc(hs if hs is not None else '-')}</td>
+    <td style="{score_style(CHART_HOME_HEX)}width:12%;">{esc(hs if hs is not None else '-')}</td>
     <td style="{side_style(home_win, 'left')}width:36%;">{esc(cn_team(home["name_en"], TEAM_MAP))}</td>
   </tr>
 </table>''')
@@ -1730,14 +1735,14 @@ def render_game(g, label_key=None, highlight=None, watch_note=None):
         parts.append(
             f'<div style="margin:10px 0 2px;">'
             f'<img src="{esc(g["chart"])}" style="width:100%;display:block;border:0;" alt="比分走势">'
-            f'<div style="font-size:12px;line-height:1.9;color:#9a9a9a;margin-top:6px;'
+            f'<div style="font-size:13px;line-height:1.9;color:#8a8a8a;margin-top:7px;'
             f'font-family:{FONT};">'
-            f'<span style="display:inline-block;width:16px;height:3px;background:{CHART_AWAY_HEX};'
+            f'<span style="display:inline-block;width:20px;height:4px;background:{CHART_AWAY_HEX};'
             f'vertical-align:middle;margin-right:6px;"></span>'
-            f'<span style="color:{CHART_AWAY_HEX};font-weight:600;">{esc(away_cn)}</span>'
-            f'<span style="display:inline-block;width:16px;height:3px;background:{CHART_HOME_HEX};'
+            f'<span style="color:{CHART_AWAY_HEX};font-weight:700;">{esc(away_cn)}</span>'
+            f'<span style="display:inline-block;width:20px;height:4px;background:{CHART_HOME_HEX};'
             f'vertical-align:middle;margin:0 6px 0 16px;"></span>'
-            f'<span style="color:{CHART_HOME_HEX};font-weight:600;">{esc(home_cn)}</span>'
+            f'<span style="color:{CHART_HOME_HEX};font-weight:700;">{esc(home_cn)}</span>'
             f'<span style="margin-left:14px;color:#c8c8c8;font-size:11px;">横轴为比赛进程</span>'
             f'</div>'
             f'</div>'
