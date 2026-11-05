@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>篮球每日战报 · 公众号运营方案 v1.0</title>
+<title>篮球每日战报 · 公众号运营方案 v1.2</title>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -82,7 +82,7 @@
 <div class="wrap">
 
   <h1 class="doc-title">篮球每日战报 · 公众号运营方案</h1>
-  <p class="doc-sub">v1.0 ｜ 个人订阅号 ｜ 2026-11-02</p>
+  <p class="doc-sub">v1.2 ｜ 个人订阅号 ｜ 2026-11-02 初版，11-05 修订发布时段</p>
   <span class="badge">替代 v0.1 小程序方案</span>
 
   <div class="note">
@@ -127,9 +127,9 @@
 
   <p>时间依据：东部主场 19:30 开打折合北京时间 08:30（冬令时），一场球实际耗时约 2 小时 15 分，11:00 前后结束；西部主场晚场 11:30 才开打，13:45–14:00 收尾；TNT 双赛日的第二场最晚约 14:30。夏令时期间整体提前 1 小时，14:30 仍是安全上限。</p>
 
-  <p>这意味着 <strong>14:30 之后当天已无新比赛</strong>，到 17:30 群发有 3 小时缓冲——写稿时间从不紧张，紧张的是"今天写什么"的判断。</p>
+  <p>这意味着 <strong>14:30 之后当天已无新比赛</strong>，而战报生成后会一直挂在 Pages 上等你——写稿和发布不必挤在同一个下午，紧张的是"今天写什么"的判断，不是几点发。</p>
 
-  <p><strong>发布时间定为 17:30</strong>，理由不是"比赛刚结束"，而是下班通勤正是刷手机的高峰。代价是那会儿你可能还在路上：草稿必须在 17:00 前后于电脑上排好版，手机上用「订阅号助手」完成最后的群发。这条流程建议先实际走通一次。</p>
+  <p><strong>发布时间不设死钟点，按手边有电脑的时段来（建议晚上 21:00 后）</strong>。v1.0 曾定 17:30 通勤高峰，并设想「17:00 电脑排版、手机订阅号助手点群发」；但实际情况是白天没电脑，而且那套设想不成立：<strong>手机上只能看战报，发不了完整战报</strong>。全选复制富文本、粘贴后核对 14 张走势图，这一步需要电脑浏览器；手机 App 的编辑器是简易版，跨 App 粘贴只剩纯文字，手机浏览器切电脑 UA 虽能登后台，却界面错位、还要另一台设备扫码，只够点群发已存好的草稿。<strong>日更号的资产是「今天有没有」，不是「17:30 有没有」</strong>；球迷晚上躺着刷手机，比通勤时段更合适。</p>
 
   <div class="timeline">
     <div class="tl-item">
@@ -140,31 +140,24 @@
       </div>
     </div>
     <div class="tl-item">
-      <div class="tl-time">16:30</div>
+      <div class="tl-time">16:40</div>
       <div class="tl-body">
-        <strong>改导语</strong>
-        <span>打开生成好的页面，把那 120 字换成"今天最值得说的一件事"。这是唯一无法自动化的部分。</span>
+        <strong>补拉兜底</strong>
+        <span>定时任务再跑一次，兜住打到很晚的加时场。此后内容定稿，一直挂在 Pages 上等你，不会过期。</span>
       </div>
     </div>
     <div class="tl-item">
-      <div class="tl-time">17:00</div>
+      <div class="tl-time">晚上</div>
       <div class="tl-body">
-        <strong>粘贴进编辑器</strong>
-        <span>全选复制 → 粘到公众号编辑器（样式内联，能保留排版）→ 配封面 → 定标题。</span>
+        <strong>改导语 + 粘贴排版</strong>
+        <span>回到电脑前打开发布台：改导语那 120 字 → 全选复制战报粘进编辑器 → 确认 14 张走势图都上传成功 → 配封面、定标题（至少 5 个备选）。</span>
       </div>
     </div>
     <div class="tl-item">
-      <div class="tl-time">17:15</div>
-      <div class="tl-body">
-        <strong>定标题 + 二维码</strong>
-        <span>标题至少写 5 个备选，选最有信息量的那个。封面套固定模板。</span>
-      </div>
-    </div>
-    <div class="tl-item">
-      <div class="tl-time">17:30</div>
+      <div class="tl-time">随后</div>
       <div class="tl-body">
         <strong>群发</strong>
-        <span>下班通勤刷手机的高峰。发出后 20 字以内可改，其余不可改。</span>
+        <span>点「群发」而不是「发布」，管理员微信扫码。发出后 20 字以内可改，其余不可改。</span>
       </div>
     </div>
   </div>
@@ -365,7 +358,7 @@
 
   <p>这件事没有任何工具能替你完成。它决定了 30 天后还有多少人会在 21:00 点开你。</p>
 
-  <p class="footer">方案 v1.1 ｜ 已配套自动生成流水线（scripts/fetch_nba.py + GitHub Actions），产物见 docs/report.html ｜ 待确认：账号名称、头条写作风格</p>
+  <p class="footer">方案 v1.2 ｜ 发布时段改为「晚上有电脑时」，不再卡 17:30；手机仅用于查看战报 ｜ 已配套自动生成流水线（scripts/fetch_nba.py + GitHub Actions）与发布台（docs/publish.html）｜ 待确认：账号名称、头条写作风格</p>
 
 </div>
 </body>
