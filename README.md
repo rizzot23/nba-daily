@@ -70,18 +70,25 @@ git remote add origin https://github.com/<你的用户名>/<仓库名>.git
 git push -u origin main
 ```
 
-第一次推会弹窗要求登录。GitHub 现在只认 **Personal Access Token**，不认账号密码：
-`Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token`，
-勾 `repo` 一项即可，生成后把 `ghp_xxx` 那串当密码粘进去。Windows 会把它存进凭据管理器，之后不用再输。
+第一次推会弹窗要求登录。GitHub 现在只认 **Personal Access Token（PAT）**，不认账号密码：
+
+1. 打开 `https://github.com/settings/tokens`（或 `Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token (classic)`）。
+2. Note 随便填（比如 `nba-daily`），Expiration 选 90 天或长期，权限**只勾第一项 `repo`**，拉到底 Generate token。
+3. `ghp_xxx` 那串**只显示一次**，当场复制。弹窗里用户名填 GitHub 用户名，密码栏粘贴这串 token（不是账号密码）。Windows 会存进凭据管理器，以后不用再输。
+
+如果之前存过错误凭据导致反复认证失败：控制面板 → 凭据管理器 → Windows 凭据 → 删掉 `git:https://github.com` 那条，再推一次。
+用 Fine-grained token 也行，但要选到这个仓库并给 **Contents: Read and write**，比 classic 麻烦，第一次建议直接用 classic。
+**别把 token 写进 remote URL 或任何要提交的文件**——那等于把仓库钥匙公开。
 
 ### 2. 手动跑一次（验证链路）
 
 **先改一个设置，否则跑完推不上去**：`Settings → Actions → General → Workflow permissions` → 选 **Read and write permissions** → Save。
 新仓库默认是只读的，机器人生成了战报但没权限提交回去，日志会报 403。
 
-然后：仓库页 → `Actions` → 如果看到黄色横幅「Workflows aren't being run on this forked repository」之类的提示，点 `I understand my workflows, go ahead and enable them`。
+然后：仓库页 → `Actions` → 左侧点「**去球吧 每日战报**」→ 右侧 `Run workflow` → 下拉选 `main` → 再点绿色 `Run workflow`。
 
-左侧点「每日战报生成」→ 右侧 `Run workflow` → 下拉选 `main` → 再点绿色 `Run workflow`。
+**不要等第二天 15:30 才算跑通**：定时任务要等到下一个 cron 时间点才会第一次自己触发，先手动跑一次才能当场确认整条链路没断。
+（只有 fork 来的仓库才会出现「Workflows aren't being run on this forked repository」的黄色横幅，自己新建的仓库不用管。）
 
 约 1 分钟跑完。点进去能看到「Summary」页里有一份当天摘要（几场、哪场最胶着、明日焦点是谁），
 下方 `Artifacts` 里有 `daily-report-N` 可以下载。同时仓库的 `docs/report.html` 会被机器人自动提交一次。
