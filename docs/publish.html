@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>去球吧 · 发布台</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 28px 18px 60px;
+    background: #faf9f7; color: #23212a;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    line-height: 1.7;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: 1px; }
+  .sub { font-size: 13px; color: #8a8790; margin: 0 0 22px; }
+  .status {
+    background: #fff; border: 1px solid #e8e5e0; border-left: 4px solid #c2410c;
+    border-radius: 6px; padding: 14px 16px; margin-bottom: 24px;
+  }
+  .status .date { font-size: 18px; font-weight: 700; }
+  .status .meta { font-size: 12px; color: #8a8790; margin-top: 3px; }
+  .status .warn { color: #b45309; font-size: 13px; margin-top: 8px; display: none; }
+  h2 {
+    font-size: 15px; margin: 26px 0 10px; padding-left: 10px;
+    border-left: 3px solid #c2410c; line-height: 1.3;
+  }
+  .card { background: #fff; border: 1px solid #e8e5e0; border-radius: 6px; padding: 16px; }
+  .btn {
+    display: inline-block; background: #c2410c; color: #fff; text-decoration: none;
+    border: 0; border-radius: 5px; padding: 10px 18px; font-size: 14px;
+    font-weight: 700; cursor: pointer; font-family: inherit;
+  }
+  .btn.ghost { background: #fff; color: #c2410c; border: 1px solid #e2c4b4; font-weight: 600; }
+  .btn.mini { padding: 4px 10px; font-size: 12px; font-weight: 600; }
+  .hint { font-size: 12px; color: #8a8790; margin-top: 8px; }
+  strong.k { color: #c2410c; }
+  .row {
+    display: flex; align-items: flex-start; gap: 10px; padding: 9px 0;
+    border-bottom: 1px solid #f0eeea; font-size: 14px;
+  }
+  .row:last-child { border-bottom: 0; }
+  .row .txt { flex: 1; word-break: break-all; }
+  .row code { background: #f6f4f1; padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+  ol { padding-left: 20px; margin: 0; }
+  ol li { margin: 0 0 12px; font-size: 14px; }
+  ol li b { display: block; margin-bottom: 2px; }
+  .cover { width: 100%; max-width: 360px; border: 1px solid #e8e5e0; border-radius: 4px; display: block; margin-bottom: 10px; }
+  details { margin-top: 10px; }
+  summary { cursor: pointer; font-size: 13px; color: #c2410c; }
+  .grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+  .grid a { display: block; width: 108px; text-align: center; font-size: 11px; color: #6b6870; text-decoration: none; }
+  .grid img { width: 100%; border: 1px solid #e8e5e0; border-radius: 3px; display: block; margin-bottom: 3px; }
+  .tiny { font-size: 12px; color: #8a8790; }
+  .foot { margin-top: 34px; font-size: 12px; color: #a09ca5; border-top: 1px solid #e8e5e0; padding-top: 14px; }
+  .copied { color: #15803d; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>去球吧 · 发布台</h1>
+  <p class="sub">每天打开这一页就够了。下面的内容都是实时读取线上战报生成的，15:30 之后自动换成当天新一期，不用重新发链接。</p>
+
+  <div class="status">
+    <div class="date" id="st-date">读取中…</div>
+    <div class="meta" id="st-meta"></div>
+    <div class="warn" id="st-warn">这一期不是今天生成的，可能还没跑完。去仓库 Actions 页手动 Run workflow 一次，或等 16:40 的补拉。</div>
+  </div>
+
+  <h2>1 · 主条：完整战报</h2>
+  <div class="card">
+    <a class="btn" href="./report.html" target="_blank" rel="noopener">打开今日战报（新窗口）</a>
+    <div class="hint">
+      在新窗口里按 <strong class="k">Ctrl+A</strong> → <strong class="k">Ctrl+C</strong>（Mac 用 ⌘），
+      回到公众号编辑器 <strong class="k">Ctrl+V</strong>。<br>
+      <strong class="k">必须从这个 https 页面复制</strong>，不要双击本地的 report.html —— 从 <code>file://</code> 复制，图片会上传失败。
+    </div>
+  </div>
+
+  <h2>2 · 标题与摘要</h2>
+  <div class="card">
+    <div class="tiny" style="margin-bottom:8px;">主条标题建议带球队名，微信搜一搜才有自然流量。点右边按钮直接复制。</div>
+    <div id="titles"><span class="tiny">读取中…</span></div>
+  </div>
+
+  <h2>3 · 封面</h2>
+  <div class="card">
+    <img class="cover" id="cover-img" alt="今日封面">
+    <a class="btn ghost" id="cover-dl" href="./cover.png" download="cover.png">下载封面 PNG</a>
+    <span class="tiny" style="margin-left:8px;">900 × 383，公众号头条 2.35:1</span>
+    <div class="hint">公众号后台「封面和摘要」里上传这张；头条号要重新上传，两边不共用。</div>
+  </div>
+
+  <h2>4 · 次条素材（可选）</h2>
+  <div class="card">
+    <a class="btn ghost" href="./feature.md" target="_blank" rel="noopener">打开今日主打提纲</a>
+    <div class="hint">
+      提纲里是标题候选、开场句、正文骨架和可直接引用的数字，不是成品稿。<br>
+      <strong class="k">只有 2 场之类的小日子，建议只发主条一条</strong>，先把流程走顺，别为凑次条硬写 1200 字。
+    </div>
+  </div>
+
+  <h2>5 · 发布步骤</h2>
+  <div class="card">
+    <ol>
+      <li><b>确认页面顶部日期是今天的比赛日</b>数据没更新就先别发，等自动任务或手动跑一次。</li>
+      <li><b>改导语</b>粘贴后把开头那段自动生成的导语换成你自己的一句话判断。这是唯一不能自动化、也最值得花时间的部分。</li>
+      <li><b>建多图文、粘正文、传封面</b>群发页选「图文消息」，左上角「+」可加第二条。第一条是主条。</li>
+      <li><b>填标题、摘要，核对图片</b>往下翻一遍，确认 14 张走势图都在；文末免责声明已自带，别删。</li>
+      <li><b>点「群发」，用管理员微信扫码</b><span style="color:#b91c1c;">不是「发布」</span>：「发布」只进主页、不推送、不占次数，很多人以为发出去了，其实没人收到。</li>
+    </ol>
+  </div>
+
+  <h2>6 · 兜底与排错</h2>
+  <div class="card">
+    <div class="row">
+      <div class="txt"><b>文末声明（正文已自带，这里是备份）</b><br>
+        <span id="disclaimer" class="tiny">本文基于公开赛事数据独立撰写，与 NBA 及任何转播平台无关联。</span></div>
+      <button class="btn ghost mini" data-copy="disclaimer">复制</button>
+    </div>
+    <details id="imgs-box">
+      <summary>图片没自动上传？展开看全部走势图的 https 直链</summary>
+      <div class="hint">公众号编辑器会自己抓图上传。万一出现裂图，从这里逐张下载再手动插入；正常情况不用展开。</div>
+      <div class="grid" id="imgs"></div>
+    </details>
+    <div class="hint" style="margin-top:14px;">
+      <b>样式乱了</b>：只从浏览器里复制，别把 HTML 源码粘进去。<br>
+      <b>找不到群发</b>：个人订阅号每天 1 次群发，在「新的创作 → 图文消息」里发完后点群发，需管理员微信扫码。<br>
+      <b>页面还是上一期</b>：先 Ctrl+F5 强制刷新，再去 Actions 手动 Run workflow 一次。
+    </div>
+  </div>
+
+  <div class="foot">
+    发布台是静态页，不写任何内容，读的是同目录的 latest.json / feature.json / feature.md / report.html。<br>
+    定时任务（北京 15:30 首拉、16:40 补拉）跑完后，这一页和战报会一起更新。
+  </div>
+
+</div>
+
+<script>
+const BASE = location.href.replace(/publish\.html.*$/, '');
+const $ = (id) => document.getElementById(id);
+
+async function text(name) {
+  const r = await fetch(name + '?t=' + Date.now(), { cache: 'no-store' });
+  if (!r.ok) throw new Error(name + ' ' + r.status);
+  return r.text();
+}
+function esc(s) {
+  return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+function copy(s, btn) {
+  const done = () => {
+    const old = btn.textContent;
+    btn.textContent = '已复制';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = old; btn.classList.remove('copied'); }, 1400);
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(s).then(done).catch(() => fallback(s, done));
+  } else fallback(s, done);
+}
+function fallback(s, done) {
+  const t = document.createElement('textarea');
+  t.value = s; t.style.position = 'fixed'; t.style.opacity = '0';
+  document.body.appendChild(t); t.select();
+  try { document.execCommand('copy'); done(); } catch (e) { alert('复制失败，请手动选中文字'); }
+  document.body.removeChild(t);
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-copy]');
+  if (b) copy($(b.dataset.copy).textContent.trim(), b);
+});
+function addTitleRow(label, value) {
+  const d = document.createElement('div');
+  d.className = 'row';
+  d.innerHTML = '<div class="txt"><span class="tiny">' + esc(label) + '</span><br>' + esc(value) + '</div>' +
+                '<button class="btn ghost mini">复制</button>';
+  d.querySelector('button').onclick = function () { copy(value, this); };
+  $('titles').appendChild(d);
+}
+
+(async function () {
+  // 封面先挂上，破 Pages 缓存
+  const stamp = '?t=' + Date.now();
+  $('cover-img').src = './cover.png' + stamp;
+  $('cover-dl').href = './cover.png' + stamp;
+
+  try {
+    const d = JSON.parse(await text('./latest.json'));
+    $('st-date').textContent = d.game_date + ' 战报 · ' + (d.total_games || 0) + ' 场';
+    $('st-meta').textContent = '生成于 ' + (d.generated_at || '未知') + '　｜　比赛日按美国时间算';
+    const gen = String(d.generated_at || '').slice(0, 10);
+    const today = new Date();
+    const todayStr = today.getFullYear() + '-' +
+      String(today.getMonth() + 1).padStart(2, '0') + '-' +
+      String(today.getDate()).padStart(2, '0');
+    if (gen && gen !== todayStr) $('st-warn').style.display = 'block';
+
+    // 标题候选：主条带队名，次条/头条从提纲里取
+    addTitleRow('主条候选 1', '今天 ' + (d.total_games || 0) + ' 场战报，3 分钟看完');
+    try {
+      const f = JSON.parse(await text('./feature.json'));
+      if (f.pick) {
+        addTitleRow('主条候选 2', f.pick + '，今天 ' + (d.total_games || 0) + ' 场里最值得看的一场');
+        addTitleRow('主条候选 3', f.pick + '｜' + (d.total_games || 0) + ' 场完整比分与走势');
+      }
+    } catch (e) {}
+
+    try {
+      const md = await text('./feature.md');
+      const sm = md.match(/\*\*摘要\*\*[^：:]*[：:]\s*([^\n]+)/);
+      if (sm) addTitleRow('摘要（54 字内）', sm[1].trim());
+      const group = (mark) => {
+        const i = md.indexOf(mark);
+        if (i < 0) return [];
+        return md.slice(i, i + 500).split('\n')
+          .filter(l => /^\s*\d+\.\s/.test(l))
+          .slice(0, 3)
+          .map(l => l.replace(/^\s*\d+\.\s*/, '').replace(/（\d+\s*字）\s*$/, '').trim());
+      };
+      group('**公众号次条**').forEach((t, i) => addTitleRow('次条候选 ' + (i + 1), t));
+      group('**头条号**').forEach((t, i) => addTitleRow('头条号候选 ' + (i + 1), t));
+    } catch (e) {}
+    if (!$('titles').children.length) $('titles').innerHTML = '<span class="tiny">提纲读取失败，直接打开 feature.md 查看。</span>';
+  } catch (e) {
+    $('st-date').textContent = '读取失败';
+    $('st-meta').textContent = String(e);
+  }
+
+  // 图片兜底：展开时才去拉 report.html
+  let loaded = false;
+  $('imgs-box').addEventListener('toggle', async function () {
+    if (!this.open || loaded) return;
+    loaded = true;
+    try {
+      const h = await text('./report.html');
+      const srcs = [...h.matchAll(/<img[^>]+src="([^"]+)"/g)].map(m => new URL(m[1], BASE).href);
+      $('imgs').innerHTML = srcs.map((u, i) =>
+        '<a href="' + esc(u) + '" target="_blank" rel="noopener">' +
+        '<img src="' + esc(u) + '" alt="走势图 ' + (i + 1) + '">图 ' + (i + 1) + '</a>'
+      ).join('');
+      if (!srcs.length) $('imgs').innerHTML = '<span class="tiny">这一期没有走势图（休战日或数据缺失）。</span>';
+    } catch (e) {
+      $('imgs').innerHTML = '<span class="tiny">读取失败：' + esc(String(e)) + '</span>';
+    }
+  });
+})();
+</script>
+</body>
+</html>
