@@ -1,6 +1,6 @@
 {
   "game_date": "2026-11-05",
-  "generated_at": "2026-11-06T23:18:00+08:00",
+  "generated_at": "2026-11-06T23:24:26+08:00",
   "total_games": 2,
   "rating_scale": [
     "夯",
@@ -30,7 +30,8 @@
       "result": "胜",
       "pts": "29",
       "reb": "1",
-      "ast": "4"
+      "ast": "4",
+      "reason": ""
     },
     {
       "cn": "东契奇",
@@ -40,7 +41,8 @@
       "result": "",
       "pts": "",
       "reb": "",
-      "ast": ""
+      "ast": "",
+      "reason": ""
     },
     {
       "cn": "詹姆斯",
@@ -50,7 +52,8 @@
       "result": "",
       "pts": "",
       "reb": "",
-      "ast": ""
+      "ast": "",
+      "reason": ""
     },
     {
       "cn": "杜兰特",
@@ -60,7 +63,8 @@
       "result": "",
       "pts": "",
       "reb": "",
-      "ast": ""
+      "ast": "",
+      "reason": ""
     },
     {
       "cn": "文班亚马",
@@ -70,7 +74,8 @@
       "result": "",
       "pts": "",
       "reb": "",
-      "ast": ""
+      "ast": "",
+      "reason": ""
     },
     {
       "cn": "杨瀚森",
@@ -80,9 +85,11 @@
       "result": "",
       "pts": "",
       "reb": "",
-      "ast": ""
+      "ast": "",
+      "reason": ""
     }
   ],
+  "breakouts": [],
   "cover": {
     "date": "2026年11月5日",
     "away": "热火",
