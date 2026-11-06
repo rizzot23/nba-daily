@@ -4,7 +4,7 @@ on:
   schedule:
     # ⚠️ GitHub 的 cron 一律按 UTC 算，比北京慢 8 小时
     # UTC 06:10 = 北京 14:10（早档：最晚 11:00 开球的比赛约 13:30 终场，留 40 分钟缓冲）
-    # 这一档只有「当天所有比赛都已终场」才出稿，见下面的「早档检查」
+    # 四档都带「比赛日全部终场才出稿」的检查，见下面的「出稿前检查」
     - cron: "10 6 * * *"
     # UTC 07:30 = 北京 15:30（首拉：当天所有比赛约 13:30 前打完，留 2 小时缓冲）
     - cron: "30 7 * * *"
@@ -59,12 +59,13 @@ jobs:
 
       # 数据来自 ESPN 公开接口，不需要任何 Key。
       # BALLDONTLIE_API_KEY 只是 ESPN 万一改接口时的比分兜底，没配也能跑。
-      # 14:10 早档专用：当天还有比赛没终场就整档跳过，
-      # 免得推一份少了几场的残缺战报上线，交给 15:30 那档补齐。
-      # 其它档命中不了这个 if，gate 的 output 为空时下面条件为真，照常跑。
-      - name: 早档检查（是否全部终场）
+      # 所有定时档共用的出稿前检查：比赛日只要还有一场没终场，整档跳过、不碰 docs/。
+      # 起因：GitHub schedule 会延迟投递，19:20 那档曾拖到次日 00:16 才跑，那时当天的
+      # 比赛还没开打，脚本排除未终场场次后推了一份 0 场空战报上线，覆盖掉前一天的完整版。
+      # 手动 Run workflow 不检查（gate 被跳过、output 为空，下面条件为真），方便补跑指定日期。
+      - name: 出稿前检查（比赛日是否全部终场）
         id: gate
-        if: github.event.schedule == '10 6 * * *'
+        if: github.event_name == 'schedule'
         run: |
           python - <<'PY'
           import json, os, urllib.request, datetime
@@ -84,11 +85,11 @@ jobs:
               if pending:
                   go = "false"
           except Exception as ex:
-              print("ESPN 记分板拉取失败，早档跳过：", ex)
+              print("ESPN 记分板拉取失败，整档跳过：", ex)
               go = "false"
           with open(os.environ["GITHUB_OUTPUT"], "a") as f:
               f.write("go=" + go + "\n")
-          print("早档放行，开始出稿" if go == "true" else "早档跳过，等 15:30 那档")
+          print("检查通过，开始出稿" if go == "true" else "整档跳过，页面保留上一期战报")
           PY
 
       - name: 生成战报
