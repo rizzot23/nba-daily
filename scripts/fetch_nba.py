@@ -2298,9 +2298,9 @@ def render_tomorrow(info):
     # 明天就打
     if info.get("status") == "play":
         tail = (
-            f"{info['total']} 场季后赛，这是最值得定闹钟的一场"
+            f"{info['total']} 场季后赛，上述是值得关注场次"
             if info.get("postseason")
-            else f"全联盟 {info['total']} 场，这是最值得定闹钟的一场"
+            else f"全联盟 {info['total']} 场，上述是值得关注场次"
         )
         return (
             wrap_open + head + pick_block() + watch_block() +
@@ -2449,7 +2449,6 @@ def render_page(games, game_date, display_date, tomorrow=None):
 
   <div style="font-size:12px;color:#b0b0b0;line-height:1.8;margin-top:6px;">
     <span style="color:{COLOR_ACCENT};">去球吧</span> ｜ 每天一份 NBA 战报，只写场上发生的事<br>
-    评级按场上数据自动分档，是绝对标准不是当天排名；可以一整天都没有「拉完了」。<br>
     本文基于公开赛事数据独立撰写，与 NBA 及任何转播平台无关联。<br>
     比赛日 {esc(game_date)}（美国时间）｜ 数据来源：ESPN
   </div>
