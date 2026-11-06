@@ -1,7 +1,7 @@
 {
-  "game_date": "2026-11-05",
-  "generated_at": "2026-11-06T23:24:26+08:00",
-  "total_games": 2,
+  "game_date": "2026-11-06",
+  "generated_at": "2026-11-07T00:17:37+08:00",
+  "total_games": 0,
   "rating_scale": [
     "夯",
     "顶级",
@@ -13,198 +13,62 @@
   "rating_counts": {
     "夯": 0,
     "顶级": 0,
-    "人上人": 1,
+    "人上人": 0,
     "NPC": 0,
-    "拉": 1,
+    "拉": 0,
     "拉完了": 0
   },
   "postseason": false,
-  "headline": "热火 100-120 勇士",
-  "lead": "今天 2 场，最胶着的是热火 100-120 勇士：交替领先 3 次，打平 9 次，勇士一度落后 10 分。",
-  "focus": [
-    {
-      "cn": "库里",
-      "state": "played",
-      "team": "勇士",
-      "opp": "热火",
-      "result": "胜",
-      "pts": "29",
-      "reb": "1",
-      "ast": "4",
-      "reason": ""
-    },
-    {
-      "cn": "东契奇",
-      "state": "idle",
-      "team": "湖人",
-      "opp": "",
-      "result": "",
-      "pts": "",
-      "reb": "",
-      "ast": "",
-      "reason": ""
-    },
-    {
-      "cn": "詹姆斯",
-      "state": "idle",
-      "team": "76人",
-      "opp": "",
-      "result": "",
-      "pts": "",
-      "reb": "",
-      "ast": "",
-      "reason": ""
-    },
-    {
-      "cn": "杜兰特",
-      "state": "idle",
-      "team": "火箭",
-      "opp": "",
-      "result": "",
-      "pts": "",
-      "reb": "",
-      "ast": "",
-      "reason": ""
-    },
-    {
-      "cn": "文班亚马",
-      "state": "idle",
-      "team": "马刺",
-      "opp": "",
-      "result": "",
-      "pts": "",
-      "reb": "",
-      "ast": "",
-      "reason": ""
-    },
-    {
-      "cn": "杨瀚森",
-      "state": "idle",
-      "team": "开拓者",
-      "opp": "",
-      "result": "",
-      "pts": "",
-      "reb": "",
-      "ast": "",
-      "reason": ""
-    }
-  ],
+  "headline": null,
+  "lead": "今天没有比赛。",
+  "focus": [],
   "breakouts": [],
-  "cover": {
-    "date": "2026年11月5日",
-    "away": "热火",
-    "away_score": 100,
-    "away_color": "98002e",
-    "home": "勇士",
-    "home_score": 120,
-    "home_color": "fdb927",
-    "footer": "全联盟 2 场|今日最胶着"
-  },
-  "best_action": {
-    "player": "小温德尔·卡特",
-    "kind": "alley",
-    "dist_ft": 1,
-    "period": 4,
-    "clock_sec": 705.0,
-    "game": "魔术 104-117 太阳"
-  },
+  "cover": null,
+  "best_action": null,
   "tomorrow": {
-    "date": "2026-11-06",
-    "date_cn": "11月6日（周五）",
+    "date": "2026-11-07",
+    "date_cn": "11月7日（周六）",
     "days_ahead": 1,
-    "total": 9,
+    "total": 7,
     "postseason": false,
     "pick": {
-      "away": "开拓者",
-      "home": "湖人",
-      "away_record": "6-1",
-      "home_record": "7-2",
-      "bj_date": "11月7日",
+      "away": "马刺",
+      "home": "开拓者",
+      "away_record": "6-2",
+      "home_record": "6-1",
+      "bj_date": "11月8日",
       "bj_time": "11:00",
-      "national": [
-        "Prime Video"
-      ],
+      "national": [],
       "stars": [
-        "东契奇",
+        "文班亚马",
         "杨瀚森"
       ],
       "postseason": false,
       "facts": [
-        "Prime Video 全美直播",
-        "NBA 杯小组赛",
-        "两边都赢得多（6胜1负 / 7胜2负）",
-        "东契奇、杨瀚森 出战"
+        "两边都赢得多（6胜2负 / 6胜1负）",
+        "文班亚马、杨瀚森 出战"
       ],
-      "score": 233.3
+      "score": 159.6
     },
     "watch": [
       {
-        "away": "76人",
-        "home": "骑士",
-        "bj_date": "11月7日",
-        "bj_time": "08:30",
-        "national": [
-          "Prime Video"
-        ],
+        "away": "魔术",
+        "home": "勇士",
+        "bj_date": "11月8日",
+        "bj_time": "09:30",
+        "national": [],
         "core": true
       },
       {
-        "away": "马刺",
-        "home": "国王",
-        "bj_date": "11月7日",
-        "bj_time": "11:00",
+        "away": "火箭",
+        "home": "太阳",
+        "bj_date": "11月8日",
+        "bj_time": "10:00",
         "national": [],
         "core": true
       }
     ],
     "status": "play"
   },
-  "games": [
-    {
-      "away": "魔术",
-      "home": "太阳",
-      "away_score": 104,
-      "home_score": 117,
-      "label": "今日最平淡",
-      "rating": {
-        "key": "D",
-        "name": "拉",
-        "reason": "赢 13 分，末节没缠斗"
-      },
-      "series": null,
-      "overtimes": 0,
-      "hook": "魔术末节打出 31-21，但前面落后太多，最终仍差 13 分。",
-      "drama": {
-        "lead_changes": 5,
-        "ties": 2,
-        "comeback": 6,
-        "close_seconds_q4": 0,
-        "score": 34.0,
-        "clutch": null
-      }
-    },
-    {
-      "away": "热火",
-      "home": "勇士",
-      "away_score": 100,
-      "home_score": 120,
-      "label": "今日最胶着",
-      "rating": {
-        "key": "B",
-        "name": "人上人",
-        "reason": "从落后 10 分打回来"
-      },
-      "series": null,
-      "overtimes": 0,
-      "hook": "勇士一度落后 10 分，翻盘赢 20 分。",
-      "drama": {
-        "lead_changes": 3,
-        "ties": 9,
-        "comeback": 10,
-        "close_seconds_q4": 0,
-        "score": 49.0,
-        "clutch": null
-      }
-    }
-  ]
+  "games": []
 }
