@@ -1,7 +1,23 @@
 {
   "game_date": "2026-11-05",
-  "generated_at": "2026-11-06T22:42:27+08:00",
+  "generated_at": "2026-11-06T23:05:47+08:00",
   "total_games": 2,
+  "rating_scale": [
+    "夯",
+    "顶级",
+    "人上人",
+    "NPC",
+    "拉",
+    "拉完了"
+  ],
+  "rating_counts": {
+    "夯": 0,
+    "顶级": 0,
+    "人上人": 1,
+    "NPC": 0,
+    "拉": 1,
+    "拉完了": 0
+  },
   "postseason": false,
   "headline": "热火 100-120 勇士",
   "lead": "今天 2 场，最胶着的是热火 100-120 勇士：交替领先 3 次，打平 9 次，勇士一度落后 10 分。",
@@ -143,6 +159,11 @@
       "away_score": 104,
       "home_score": 117,
       "label": "今日最平淡",
+      "rating": {
+        "key": "D",
+        "name": "拉",
+        "reason": "赢 13 分，末节没缠斗"
+      },
       "series": null,
       "overtimes": 0,
       "hook": "魔术末节打出 31-21，但前面落后太多，最终仍差 13 分。",
@@ -161,6 +182,11 @@
       "away_score": 100,
       "home_score": 120,
       "label": "今日最胶着",
+      "rating": {
+        "key": "B",
+        "name": "人上人",
+        "reason": "从落后 10 分打回来"
+      },
       "series": null,
       "overtimes": 0,
       "hook": "勇士一度落后 10 分，翻盘赢 20 分。",
