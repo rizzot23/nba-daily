@@ -1,65 +1,65 @@
 {
-  "game_date": "2026-11-04",
-  "generated_at": "2026-11-05T23:31:21+08:00",
-  "total_games": 14,
+  "game_date": "2026-11-05",
+  "generated_at": "2026-11-06T22:15:49+08:00",
+  "total_games": 2,
   "postseason": false,
-  "headline": "热火 117-116 快船",
-  "lead": "今天 14 场，最狠的一刻出在热火 117-116 快船：克莱·汤普森压哨投进反超球，他们一度落后 20 分、多打一个加时。",
+  "headline": "热火 100-120 勇士",
+  "lead": "今天 2 场，最胶着的是热火 100-120 勇士：交替领先 3 次，打平 9 次，勇士一度落后 10 分。",
   "focus": [
     {
-      "cn": "东契奇",
+      "cn": "库里",
       "state": "played",
-      "team": "湖人",
-      "opp": "国王",
+      "team": "勇士",
+      "opp": "热火",
       "result": "胜",
-      "pts": "40",
-      "reb": "9",
-      "ast": "7"
+      "pts": "29",
+      "reb": "1",
+      "ast": "4"
+    },
+    {
+      "cn": "东契奇",
+      "state": "idle",
+      "team": "湖人",
+      "opp": "",
+      "result": "",
+      "pts": "",
+      "reb": "",
+      "ast": ""
     },
     {
       "cn": "詹姆斯",
-      "state": "played",
+      "state": "idle",
       "team": "76人",
-      "opp": "活塞",
-      "result": "胜",
-      "pts": "13",
-      "reb": "10",
-      "ast": "8"
+      "opp": "",
+      "result": "",
+      "pts": "",
+      "reb": "",
+      "ast": ""
     },
     {
       "cn": "杜兰特",
-      "state": "played",
+      "state": "idle",
       "team": "火箭",
-      "opp": "森林狼",
-      "result": "负",
-      "pts": "21",
-      "reb": "5",
-      "ast": "2"
+      "opp": "",
+      "result": "",
+      "pts": "",
+      "reb": "",
+      "ast": ""
     },
     {
       "cn": "文班亚马",
-      "state": "played",
+      "state": "idle",
       "team": "马刺",
-      "opp": "独行侠",
-      "result": "胜",
-      "pts": "52",
-      "reb": "24",
-      "ast": "2"
+      "opp": "",
+      "result": "",
+      "pts": "",
+      "reb": "",
+      "ast": ""
     },
     {
       "cn": "杨瀚森",
-      "state": "played",
-      "team": "开拓者",
-      "opp": "太阳",
-      "result": "胜",
-      "pts": "0",
-      "reb": "0",
-      "ast": "0"
-    },
-    {
-      "cn": "库里",
       "state": "idle",
-      "team": "勇士",
+      "team": "开拓者",
       "opp": "",
       "result": "",
       "pts": "",
@@ -68,313 +68,109 @@
     }
   ],
   "cover": {
-    "date": "2026年11月4日",
+    "date": "2026年11月5日",
     "away": "热火",
-    "away_score": 117,
+    "away_score": 100,
     "away_color": "98002e",
-    "home": "快船",
-    "home_score": 116,
-    "home_color": "12173f",
-    "footer": "全联盟 14 场|今日最大逆转"
+    "home": "勇士",
+    "home_score": 120,
+    "home_color": "fdb927",
+    "footer": "全联盟 2 场|今日最胶着"
   },
   "best_action": {
-    "player": "克莱·汤普森",
-    "kind": "clutch",
-    "dist_ft": null,
-    "period": 5,
-    "clock_sec": 1.0,
-    "game": "热火 117-116 快船"
+    "player": "小温德尔·卡特",
+    "kind": "alley",
+    "dist_ft": 1,
+    "period": 4,
+    "clock_sec": 705.0,
+    "game": "魔术 104-117 太阳"
   },
   "tomorrow": {
-    "date": "2026-11-05",
-    "date_cn": "11月5日（周四）",
+    "date": "2026-11-06",
+    "date_cn": "11月6日（周五）",
     "days_ahead": 1,
-    "total": 2,
+    "total": 9,
     "postseason": false,
     "pick": {
-      "away": "热火",
-      "home": "勇士",
-      "away_record": "3-5",
-      "home_record": "5-3",
-      "bj_date": "11月6日",
+      "away": "开拓者",
+      "home": "湖人",
+      "away_record": "6-1",
+      "home_record": "7-2",
+      "bj_date": "11月7日",
       "bj_time": "11:00",
       "national": [
-        "NBA TV"
+        "Prime Video"
       ],
       "stars": [
-        "库里"
+        "东契奇",
+        "杨瀚森"
       ],
       "postseason": false,
       "facts": [
-        "NBA TV 全美直播",
-        "库里 出战"
+        "Prime Video 全美直播",
+        "NBA 杯小组赛",
+        "两边都赢得多（6胜1负 / 7胜2负）",
+        "东契奇、杨瀚森 出战"
       ],
-      "score": 130.0
+      "score": 233.3
     },
-    "watch": [],
+    "watch": [
+      {
+        "away": "76人",
+        "home": "骑士",
+        "bj_date": "11月7日",
+        "bj_time": "08:30",
+        "national": [
+          "Prime Video"
+        ],
+        "core": true
+      },
+      {
+        "away": "马刺",
+        "home": "国王",
+        "bj_date": "11月7日",
+        "bj_time": "11:00",
+        "national": [],
+        "core": true
+      }
+    ],
     "status": "play"
   },
   "games": [
     {
-      "away": "76人",
-      "home": "活塞",
-      "away_score": 112,
-      "home_score": 106,
-      "label": null,
-      "series": null,
-      "overtimes": 0,
-      "hook": "活塞末节打出 31-21，但前面落后太多，最终仍差 6 分。",
-      "drama": {
-        "lead_changes": 5,
-        "ties": 1,
-        "comeback": 6,
-        "close_seconds_q4": 44,
-        "score": 52.4,
-        "clutch": null
-      }
-    },
-    {
-      "away": "老鹰",
-      "home": "奇才",
-      "away_score": 120,
-      "home_score": 105,
-      "label": null,
-      "series": null,
-      "overtimes": 0,
-      "hook": "老鹰最多领先 16 分，最终赢 15 分。",
-      "drama": {
-        "lead_changes": 8,
-        "ties": 4,
-        "comeback": 5,
-        "close_seconds_q4": 0,
-        "score": 49.0,
-        "clutch": null
-      }
-    },
-    {
-      "away": "雄鹿",
-      "home": "凯尔特人",
-      "away_score": 102,
-      "home_score": 109,
-      "label": "今日最功亏一篑",
-      "series": null,
-      "overtimes": 0,
-      "hook": "全场交替领先 4 次、打平 4 次，凯尔特人最后阶段才拉开 7 分。",
-      "drama": {
-        "lead_changes": 4,
-        "ties": 4,
-        "comeback": 1,
-        "close_seconds_q4": 576,
-        "score": 81.0,
-        "clutch": null
-      }
-    },
-    {
-      "away": "黄蜂",
-      "home": "篮网",
+      "away": "魔术",
+      "home": "太阳",
       "away_score": 104,
-      "home_score": 114,
-      "label": null,
-      "series": null,
-      "overtimes": 0,
-      "hook": "全场交替领先 12 次、打平 11 次，篮网最后阶段才拉开 10 分。",
-      "drama": {
-        "lead_changes": 12,
-        "ties": 11,
-        "comeback": 10,
-        "close_seconds_q4": 240,
-        "score": 109.3,
-        "clutch": null
-      }
-    },
-    {
-      "away": "公牛",
-      "home": "尼克斯",
-      "away_score": 105,
-      "home_score": 135,
+      "home_score": 117,
       "label": "今日最平淡",
       "series": null,
       "overtimes": 0,
-      "hook": "尼克斯最多领先 44 分，末段被追到 30 分。",
+      "hook": "魔术末节打出 31-21，但前面落后太多，最终仍差 13 分。",
       "drama": {
-        "lead_changes": 4,
-        "ties": 1,
-        "comeback": 2,
+        "lead_changes": 5,
+        "ties": 2,
+        "comeback": 6,
         "close_seconds_q4": 0,
-        "score": 21.0,
-        "clutch": null
-      }
-    },
-    {
-      "away": "步行者",
-      "home": "灰熊",
-      "away_score": 107,
-      "home_score": 103,
-      "label": null,
-      "series": null,
-      "overtimes": 0,
-      "hook": "全场交替领先 16 次、打平 9 次，步行者最后阶段才拉开 4 分。",
-      "drama": {
-        "lead_changes": 16,
-        "ties": 9,
-        "comeback": 8,
-        "close_seconds_q4": 702,
-        "score": 187.0,
-        "clutch": null
-      }
-    },
-    {
-      "away": "爵士",
-      "home": "鹈鹕",
-      "away_score": 113,
-      "home_score": 120,
-      "label": "今日最胶着",
-      "series": null,
-      "overtimes": 1,
-      "hook": "鹈鹕一度落后 13 分，翻盘赢 7 分。",
-      "drama": {
-        "lead_changes": 23,
-        "ties": 14,
-        "comeback": 13,
-        "close_seconds_q4": 754,
-        "score": 207.0,
-        "clutch": null
-      }
-    },
-    {
-      "away": "骑士",
-      "home": "雷霆",
-      "away_score": 116,
-      "home_score": 124,
-      "label": null,
-      "series": null,
-      "overtimes": 0,
-      "hook": "雷霆最多领先 25 分，末段被追到 8 分。",
-      "drama": {
-        "lead_changes": 0,
-        "ties": 0,
-        "comeback": 0,
-        "close_seconds_q4": 0,
-        "score": 7.0,
-        "clutch": null
-      }
-    },
-    {
-      "away": "森林狼",
-      "home": "火箭",
-      "away_score": 117,
-      "home_score": 107,
-      "label": null,
-      "series": null,
-      "overtimes": 0,
-      "hook": "全场交替领先 26 次、打平 15 次，森林狼最后阶段才拉开 10 分。",
-      "drama": {
-        "lead_changes": 26,
-        "ties": 15,
-        "comeback": 5,
-        "close_seconds_q4": 647,
-        "score": 197.9,
-        "clutch": null
-      }
-    },
-    {
-      "away": "猛龙",
-      "home": "掘金",
-      "away_score": 109,
-      "home_score": 128,
-      "label": null,
-      "series": null,
-      "overtimes": 0,
-      "hook": "掘金一度落后 10 分，翻盘赢 19 分。",
-      "drama": {
-        "lead_changes": 2,
-        "ties": 4,
-        "comeback": 10,
-        "close_seconds_q4": 0,
-        "score": 30.0,
-        "clutch": null
-      }
-    },
-    {
-      "away": "开拓者",
-      "home": "太阳",
-      "away_score": 132,
-      "home_score": 119,
-      "label": null,
-      "series": null,
-      "overtimes": 0,
-      "hook": "开拓者最多领先 22 分，最终赢 13 分。",
-      "drama": {
-        "lead_changes": 4,
-        "ties": 4,
-        "comeback": 5,
-        "close_seconds_q4": 0,
-        "score": 35.0,
-        "clutch": null
-      }
-    },
-    {
-      "away": "独行侠",
-      "home": "马刺",
-      "away_score": 111,
-      "home_score": 112,
-      "label": null,
-      "series": null,
-      "overtimes": 0,
-      "hook": "全场交替领先 6 次、打平 4 次，马刺最后阶段才拉开 1 分。",
-      "drama": {
-        "lead_changes": 6,
-        "ties": 4,
-        "comeback": 3,
-        "close_seconds_q4": 525,
-        "score": 129.2,
-        "clutch": null
-      }
-    },
-    {
-      "away": "湖人",
-      "home": "国王",
-      "away_score": 116,
-      "home_score": 103,
-      "label": null,
-      "series": null,
-      "overtimes": 0,
-      "hook": "湖人最多领先 18 分，最终赢 13 分。",
-      "drama": {
-        "lead_changes": 4,
-        "ties": 6,
-        "comeback": 8,
-        "close_seconds_q4": 0,
-        "score": 44.0,
+        "score": 34.0,
         "clutch": null
       }
     },
     {
       "away": "热火",
-      "home": "快船",
-      "away_score": 117,
-      "home_score": 116,
-      "label": "今日最大逆转",
+      "home": "勇士",
+      "away_score": 100,
+      "home_score": 120,
+      "label": "今日最胶着",
       "series": null,
-      "overtimes": 1,
-      "hook": "全场交替领先 8 次、打平 5 次，热火最后阶段才拉开 1 分。",
+      "overtimes": 0,
+      "hook": "勇士一度落后 10 分，翻盘赢 20 分。",
       "drama": {
-        "lead_changes": 8,
-        "ties": 5,
-        "comeback": 20,
-        "close_seconds_q4": 772,
-        "score": 165.0,
-        "clutch": {
-          "kind": "buzzer",
-          "period": 5,
-          "clock": 1.0,
-          "points": 3,
-          "margin": 1,
-          "before": -2,
-          "player_en": "Klay Thompson",
-          "side": "away",
-          "overtime": true
-        }
+        "lead_changes": 3,
+        "ties": 9,
+        "comeback": 10,
+        "close_seconds_q4": 0,
+        "score": 49.0,
+        "clutch": null
       }
     }
   ]
