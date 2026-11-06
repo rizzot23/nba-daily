@@ -171,7 +171,25 @@ def fetch_scores_bdl(game_date):
 
 # ---------------------------------------------------------------- 解析层
 
-STAT_KEYS = ("PTS", "REB", "AST")
+# 焦点球星原本只要得分/篮板/助攻；「今日炸裂」要判三双、三分、抢断盖帽，
+# 所以顺手把这几列一起取出来。取不到的列留空，不影响老逻辑。
+STAT_KEYS = ("PTS", "REB", "AST", "3PT", "STL", "BLK")
+
+
+def _num(v):
+    """'12' / 12 -> 12；'-'、''、None -> 0。ESPN 偶尔给 '-' 表示没上。"""
+    try:
+        return int(str(v).strip())
+    except (TypeError, ValueError, AttributeError):
+        return 0
+
+
+def _made(v):
+    """'9-14' -> 9（命中数）；'--' / '' -> 0。用于 3PT 这类「命中-出手」列。"""
+    try:
+        return int(str(v).split("-")[0])
+    except (TypeError, ValueError, IndexError, AttributeError):
+        return 0
 
 
 def _linescores(competitor):
@@ -239,6 +257,7 @@ def _all_players(players_block, side):
             name = (ath.get("athlete") or {}).get("displayName") or ""
             if not name:
                 continue
+            i3, ist, ibl = idx.get("3PT", 99), idx.get("STL", 99), idx.get("BLK", 99)
             out.append({
                 "id": str((ath.get("athlete") or {}).get("id") or ""),
                 "name": name,
@@ -246,9 +265,51 @@ def _all_players(players_block, side):
                 "pts": str(stats[idx["PTS"]]).split("-")[0],
                 "reb": stats[idx["REB"]] if idx.get("REB", 99) < len(stats) else "",
                 "ast": stats[idx["AST"]] if idx.get("AST", 99) < len(stats) else "",
+                "3pm": _made(stats[i3]) if i3 < len(stats) else 0,
+                "stl": stats[ist] if ist < len(stats) else "",
+                "blk": stats[ibl] if ibl < len(stats) else "",
             })
         break  # 一组就够
     return out
+
+
+def quarter_points(plays, roster):
+    """用逐回合 `plays` 累加每个球员每节得分，供「单节 20 分」这类判定。
+
+    ESPN 的 boxscore 只有全场数据，没有分节；但 plays 里每个得分回合都有
+    scoreValue 和 period。participants[0] 是得分者（助攻者排第二）。
+
+    带一道自校验：play 累加的总分必须和 boxscore 的 PTS 完全相等，
+    否则这个球员的单节数据一律不采信。宁可漏报，也不能把解析错误
+    写成「单节 22 分」发出去。
+    """
+    acc = {}
+    for pl in plays or []:
+        if not pl.get("scoringPlay"):
+            continue
+        try:
+            val = int(pl.get("scoreValue") or 0)
+        except (TypeError, ValueError):
+            continue
+        if val <= 0:
+            continue
+        parts = pl.get("participants") or []
+        if not parts:
+            continue
+        pid = str((parts[0].get("athlete") or {}).get("id") or "")
+        if not pid:
+            continue
+        per = (pl.get("period") or {}).get("number") or 0
+        acc.setdefault(pid, {})
+        acc[pid][per] = acc[pid].get(per, 0) + val
+
+    valid = {}
+    for p in roster:
+        pid = p.get("id") or ""
+        qs = acc.get(pid) or {}
+        if qs and sum(qs.values()) == _num(p.get("pts")):
+            valid[pid] = qs
+    return valid
 
 
 def _clock_seconds(clock):
@@ -716,6 +777,8 @@ def enrich_with_summary(game, summary, mapping):
 
     plays = summary.get("plays") or []
     athletes = {p["id"]: p["name"] for p in game["roster"] if p.get("id")}
+    # 单节得分只在这里算一次，后面「今日炸裂」直接读，不再重新解析 plays
+    game["quarter_pts"] = quarter_points(plays, game["roster"])
     game["drama"] = analyze_drama(
         plays, game["home"]["score"], game["away"]["score"], athletes
     )
@@ -941,6 +1004,92 @@ def build_lead(games):
     )
 
 
+# 「今日炸裂」是给固定名单之外的人留的临时入口。
+# 固定名单一个人都不删、一个都不按表现过滤；这里只是额外把当天真打出
+# 稀罕数据的人补进来。硬门槛，不打分、不做当天排名，没达标就整块不写。
+BREAKOUT_MAX = 6
+
+
+def breakout_reasons(p, qpts):
+    """命中哪些炸裂门槛，返回 (稀罕度序号, 短文案)，按稀罕度升序。
+
+    门槛都是「绝对稀罕」而不是「今天相对最好」：可以一整天没有人达标，
+    也可以一天好几个。序号越小越罕，用来排显示顺序和取主理由。
+    """
+    pts, reb, ast = _num(p.get("pts")), _num(p.get("reb")), _num(p.get("ast"))
+    tpm, stl, blk = _num(p.get("3pm")), _num(p.get("stl")), _num(p.get("blk"))
+    qmax = max(qpts.values()) if qpts else 0
+
+    out = []
+    if pts >= 50:
+        out.append((0, f"砍下 {pts} 分"))
+    if qmax >= 20:
+        out.append((1, f"单节 {qmax} 分"))
+    if pts >= 10 and reb >= 10 and ast >= 10:
+        out.append((2, f"三双 {pts}分 {reb}板 {ast}助"))
+    if 40 <= pts < 50:
+        out.append((3, f"轰下 {pts} 分"))
+    if tpm >= 8:
+        out.append((4, f"{tpm} 记三分"))
+    if reb >= 20:
+        out.append((5, f"{reb} 个篮板"))
+    if ast >= 18:
+        out.append((6, f"{ast} 次助攻"))
+    if stl >= 6:
+        out.append((7, f"{stl} 次抢断"))
+    if blk >= 6:
+        out.append((8, f"{blk} 记盖帽"))
+    return sorted(out)
+
+
+def breakout_label(p, qpts):
+    """徽章文案：一人最多带两条，避免一行被撑爆。"""
+    hits = breakout_reasons(p, qpts)
+    return " · ".join(t for _, t in hits[:2]) if hits else ""
+
+
+def build_breakouts(games):
+    """固定追踪名单之外、当天达到炸裂门槛的球员；没有就返回空列表。"""
+    try:
+        conf = load_json(FOCUS_FILE)
+    except Exception:
+        conf = []
+    fixed = {
+        normalize_name(f.get("en", "")) for f in conf if isinstance(f, dict)
+    }
+
+    out = []
+    for g in games:
+        if not g.get("finished"):
+            continue
+        qpts = g.get("quarter_pts") or {}
+        for p in g.get("roster") or []:
+            name_en = p.get("name") or ""
+            if not name_en or normalize_name(name_en) in fixed:
+                continue
+            hits = breakout_reasons(p, qpts.get(p.get("id"), {}))
+            if not hits:
+                continue
+            side = p.get("side")
+            if side not in ("home", "away"):
+                continue
+            other = "away" if side == "home" else "home"
+            mine, theirs = g[side]["score"], g[other]["score"]
+            out.append({
+                "cn": cn_player(name_en, PLAYER_MAP),
+                "reason": " · ".join(t for _, t in hits[:2]),
+                "rank": hits[0][0],
+                "pts": p["pts"], "reb": p["reb"], "ast": p["ast"],
+                "team": cn_team(g[side]["name_en"], TEAM_MAP),
+                "opp": cn_team(g[other]["name_en"], TEAM_MAP),
+                "result": "胜" if (mine or 0) > (theirs or 0) else "负",
+            })
+
+    out.sort(key=lambda r: (r["rank"], -_num(r["pts"])))
+    # 安全阀：收官日 30 队同天，万一门槛集体触发也别把焦点区顶成整页
+    return out[:BREAKOUT_MAX]
+
+
 def build_focus(games):
     """当日焦点球星（`focus.json` 里的固定追踪名单）。
 
@@ -953,6 +1102,9 @@ def build_focus(games):
       played —— 有数据（含全 0）
       dnp    —— 球队当天打了，但他没上（缺阵/轮休）
       idle   —— 球队当天没比赛
+
+    名单上的人若当天也达到炸裂门槛，只额外挂一个徽章（reason），
+    不改变「要不要列」。徽章是增补信息，不是评选，更不是过滤条件。
     """
     try:
         conf = load_json(FOCUS_FILE)
@@ -990,15 +1142,18 @@ def build_focus(games):
         hit = on_court.get(normalize_name(f.get("en", "")))
         if hit:
             g, p = hit
+            qpts = (g.get("quarter_pts") or {}).get(p.get("id"), {})
             row = {"cn": cn, "state": "played", **matchup(g, p["side"]),
-                   "pts": p["pts"], "reb": p["reb"], "ast": p["ast"]}
+                   "pts": p["pts"], "reb": p["reb"], "ast": p["ast"],
+                   "reason": breakout_label(p, qpts)}
         elif f.get("team") in team_game:
             g, side = team_game[f["team"]]
             row = {"cn": cn, "state": "dnp", **matchup(g, side),
-                   "pts": "", "reb": "", "ast": ""}
+                   "pts": "", "reb": "", "ast": "", "reason": ""}
         else:
             row = {"cn": cn, "state": "idle", "team": f.get("team_cn") or "",
-                   "opp": "", "result": "", "pts": "", "reb": "", "ast": ""}
+                   "opp": "", "result": "", "pts": "", "reb": "", "ast": "",
+                   "reason": ""}
         out.append(row)
 
     # 全联盟都歇着的时候不摆这一块，免得五行“今日无比赛”
@@ -1011,8 +1166,61 @@ def build_focus(games):
     return out
 
 
-def render_focus(items):
-    """焦点球星区：上场的给数据，没上的说明原因，读者不至于追着问。"""
+def _breakout_badge(text):
+    """炸裂徽章。放在名字的 nowrap 块之外，长文案能自己折行不撑破窄屏。"""
+    return (
+        f'<span style="display:inline-block;font-size:11px;line-height:1.7;color:#ffffff;'
+        f'background:{COLOR_ACCENT};padding:1px 7px;margin-right:6px;font-weight:bold;'
+        f'font-family:{FONT};">{esc(text)}</span>'
+    )
+
+
+def render_breakouts(breakouts):
+    """固定名单下面的「今日炸裂」子块；没人达标就整块不渲染。"""
+    if not breakouts:
+        return ""
+
+    sub = []
+    for b in breakouts:
+        parts = []
+        if b["reb"] not in ("", None, "0"):
+            parts.append(f"{b['reb']}板")
+        if b["ast"] not in ("", None, "0"):
+            parts.append(f"{b['ast']}助")
+        sub.append(
+            f'<div style="font-size:13px;line-height:2.3;color:{COLOR_TEXT};font-family:{FONT};">'
+            f'{_breakout_badge(b["reason"])}'
+            f'<span style="white-space:nowrap;">'
+            f'<span style="font-weight:700;">{esc(b["cn"])}</span>'
+            f'<span style="font-size:15px;font-weight:700;color:{COLOR_ACCENT};'
+            f'padding-left:7px;">{esc(b["pts"])}</span>'
+            f'<span style="font-size:11px;color:{COLOR_ACCENT};">分</span>'
+            f'<span style="font-size:11px;color:#a3a3a3;padding-left:4px;">'
+            f'{esc(" ".join(parts))}</span>'
+            f'</span>'
+            f'<span style="font-size:12px;color:#9a9a9a;padding-left:7px;">'
+            f'· {esc(b["team"])} {b["result"]} {esc(b["opp"])}</span>'
+            f'</div>'
+        )
+
+    return (
+        f'<div style="margin:14px 0 0;padding-top:11px;border-top:1px dashed #eadfd4;">'
+        f'<div style="font-size:12px;font-weight:bold;color:{COLOR_ACCENT};'
+        f'letter-spacing:1px;font-family:{FONT};">今日炸裂 · 临时上榜'
+        f'<span style="font-size:11px;color:#b0b0b0;font-weight:normal;'
+        f'letter-spacing:0;padding-left:8px;">{len(breakouts)} 人</span></div>'
+        f'<div style="font-size:11px;color:#a8a8a8;line-height:1.8;margin:2px 0 4px;">'
+        f'不在固定追踪名单里，当天达到硬门槛才出现；没有就不写。</div>'
+        + "".join(sub)
+        + f'</div>'
+    )
+
+
+def render_focus(items, breakouts=None):
+    """焦点球星区：固定名单全列，上场给数据，没上的说明原因。
+
+    名单里的人当天达标只多挂一个徽章，不改变「列不列」。
+    """
     if not items:
         return ""
 
@@ -1041,13 +1249,17 @@ def render_focus(items):
             parts.append(f"{it['ast']}助")
         extra = " ".join(parts)
 
+        badge = _breakout_badge(it["reason"]) if it.get("reason") else ""
         rows.append(
             f'<div style="font-size:13px;line-height:2.3;color:{COLOR_TEXT};font-family:{FONT};">'
+            f'<span style="white-space:nowrap;">'
             f'<span style="font-weight:700;">{esc(it["cn"])}</span>'
             f'<span style="font-size:15px;font-weight:700;color:{COLOR_ACCENT};'
             f'padding-left:7px;">{esc(it["pts"])}</span>'
             f'<span style="font-size:11px;color:{COLOR_ACCENT};">分</span>'
             f'<span style="font-size:11px;color:#a3a3a3;padding-left:4px;">{esc(extra)}</span>'
+            f'</span>'
+            f'{badge}'
             f'<span style="font-size:11px;color:#e0e0e0;padding:0 7px;">·</span>'
             f'<span style="font-size:12px;color:#9a9a9a;">'
             f'{esc(it["team"])} {it["result"]} {esc(it["opp"])}</span>'
@@ -1060,8 +1272,9 @@ def render_focus(items):
     return (
         f'<div style="margin:0 0 24px;">'
         + render_section("焦点球星", f"{len(rows)} 人", top=4)
-        + f'{"".join(rows)}'
-        f'</div>'
+        + "".join(rows)
+        + render_breakouts(breakouts)
+        + f'</div>'
     )
 
 
@@ -1250,21 +1463,6 @@ def rate_game(g):
     if margin <= 8 and close <= 60:
         return r("C", f"只差 {margin} 分，但全程没缠斗")
     return r("C", f"分差 {margin} 分，中规中矩")
-
-
-def render_rating_legend():
-    """页首一行口径：六档从夯到拉完了，说明这是数据自动分档、不是当天排名。"""
-    chips = []
-    for i, (_, name, color) in enumerate(RATINGS):
-        sep = '<span style="color:#c9c9c9;padding:0 5px;">›</span>' if i else ""
-        chips.append(
-            f'{sep}<span style="color:{color};font-weight:bold;">{esc(name)}</span>'
-        )
-    return (
-        f'<div style="font-size:11px;line-height:1.8;color:#a0a0a0;margin:-10px 0 22px;'
-        f'font-family:{FONT};">比赛评级 {"".join(chips)}'
-        f'<span style="padding-left:8px;">按绝杀 / 加时 / 逆转 / 分差 / 末节胶着自动分档</span></div>'
-    )
 
 
 def pick_watchable(played, skip_id=None):
@@ -2243,9 +2441,7 @@ def render_page(games, game_date, display_date, tomorrow=None):
     <div>{esc(build_lead(games))}</div>
   </div>
 
-  {render_rating_legend()}
-
-  {render_focus(build_focus(games))}
+  {render_focus(build_focus(games), build_breakouts(games))}
 
   {blocks}
 
@@ -2385,6 +2581,7 @@ def main():
         ) if headline else None,
         "lead": build_lead(games),
         "focus": build_focus(finished),
+        "breakouts": build_breakouts(finished),
         "cover": cover,
         "best_action": ({
             "player": cn_player(best[1]["player_en"], PLAYER_MAP) if best[1].get("player_en") else None,
