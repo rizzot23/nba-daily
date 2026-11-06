@@ -1155,6 +1155,118 @@ def watch_reason(g, margin):
     return f"只差 {margin} 分"
 
 
+# ---------------------------------------------------------------- 比赛评级
+
+# 从「夯」到「拉完了」六档。这是绝对标准，不是当天的相对排名：
+# 一天里可以全是「夯」，也可以一场「拉完了」都没有，不为了凑齐梯度硬贴。
+# 颜色从热到冷，越高档越红、越低档越灰，扫一眼就知道值不值得点开。
+RATINGS = [
+    ("S", "夯",     "#b91c1c"),
+    ("A", "顶级",   "#c2570f"),
+    ("B", "人上人", "#8a6a0b"),
+    ("C", "NPC",    "#5f6b7a"),
+    ("D", "拉",     "#41697a"),
+    ("F", "拉完了", "#767676"),
+]
+RATING_BY_KEY = {k: (name, color) for k, name, color in RATINGS}
+
+
+def rate_game(g):
+    """给每场一个评级。只用能复核的数据，不靠主观「好不好看」。
+
+    和「推荐比赛」共用一套准入：夯 + 顶级 = 推荐区，人上人及以下不进，
+    绝不出现「评成夯却没被推荐」。判定从高到低命中即停，兜底是 NPC。
+    逐回合数据缺失时只按分差给中间档，不下极端结论。
+    """
+    hs, as_ = g["home"]["score"], g["away"]["score"]
+    if hs is None or as_ is None:
+        return {"key": None, "name": None, "color": None, "reason": "未终场"}
+
+    margin = abs(hs - as_)
+    dr = g.get("drama") or {}
+    cl = dr.get("clutch")
+    ot = overtimes(g)
+    cb = dr.get("comeback") or 0
+    lc = dr.get("lead_changes") or 0
+    close = dr.get("close_seconds") or 0
+    score = dr.get("score") or 0
+
+    def r(key, reason):
+        name, color = RATING_BY_KEY[key]
+        return {"key": key, "name": name, "color": color, "reason": reason}
+
+    # 没有逐回合数据时，绝杀/加时/胶着时长都无从判断，别硬评「夯」或「拉完了」
+    if not dr.get("ok"):
+        if margin <= 3:
+            return r("A", f"只差 {margin} 分")
+        if margin <= 8:
+            return r("B", f"分差 {margin} 分")
+        if margin >= 20:
+            return r("D", f"赢 {margin} 分")
+        return r("C", f"分差 {margin} 分")
+
+    # 好看的场次 = 推荐区。先过准入，再在里面挑出「夯」，
+    # 这样「夯 / 顶级」必然都进推荐区，不会出现评成夯却没被推荐。
+    if watch_ok(g, margin):
+        if cl and cl.get("kind") == "buzzer":
+            return r("S", "压哨绝杀")
+        if cl:
+            return r("S", f"最后 {int(round(cl.get('clock') or 0))} 秒反超")
+        if ot:
+            return r("S", "加时才分出胜负" if ot == 1 else f"{ot} 个加时才分出胜负")
+        if cb >= 15:
+            return r("S", f"落后 {cb} 分翻盘")
+        if margin <= 5 and score >= 150 and close >= 360:
+            return r("S", "从头咬到最后一秒")
+        return r("A", watch_reason(g, margin))
+
+    # 拉完了：全程一边倒、末节全是垃圾时间。不保底，没有就没有
+    if margin >= 20 and close <= 60 and lc <= 6 and score < 45:
+        return r("F", f"赢 {margin} 分，全程没缠斗")
+    if margin >= 25 and close <= 30:
+        return r("F", f"赢 {margin} 分，从头花到尾")
+
+    # 人上人：没够到推荐线，但确实有东西可看。
+    # cb 是「胜方曾经落后多少」，不是输方追分，措辞别写反。
+    if cb >= 8:
+        return r("B", f"从落后 {cb} 分打回来")
+    # 小分差但全程没缠斗的（score 很低、末节没咬过），只是比分好看，
+    # 不够格叫「人上人」，让它落到下面的 NPC。
+    if margin <= 8 and score >= 25:
+        return r("B", f"只差 {margin} 分")
+    if close >= 240:
+        return r("B", f"末节咬了 {int(round(close / 60))} 分钟")
+    if lc >= 10:
+        return r("B", f"交替领先 {lc} 次")
+    if score >= 70:
+        return r("B", "中段还有来有回")
+
+    # 拉：早早花了，但没到惨案
+    if margin >= 12 and close <= 120:
+        return r("D", f"赢 {margin} 分，末节没缠斗")
+    if margin >= 15 and close <= 180:
+        return r("D", f"赢 {margin} 分")
+
+    if margin <= 8 and close <= 60:
+        return r("C", f"只差 {margin} 分，但全程没缠斗")
+    return r("C", f"分差 {margin} 分，中规中矩")
+
+
+def render_rating_legend():
+    """页首一行口径：六档从夯到拉完了，说明这是数据自动分档、不是当天排名。"""
+    chips = []
+    for i, (_, name, color) in enumerate(RATINGS):
+        sep = '<span style="color:#c9c9c9;padding:0 5px;">›</span>' if i else ""
+        chips.append(
+            f'{sep}<span style="color:{color};font-weight:bold;">{esc(name)}</span>'
+        )
+    return (
+        f'<div style="font-size:11px;line-height:1.8;color:#a0a0a0;margin:-10px 0 22px;'
+        f'font-family:{FONT};">比赛评级 {"".join(chips)}'
+        f'<span style="padding-left:8px;">按绝杀 / 加时 / 逆转 / 分差 / 末节胶着自动分档</span></div>'
+    )
+
+
 def pick_watchable(played, skip_id=None):
     """挑几场值得看的，按好看程度排。导语讲过的那场跳过，不重复。"""
     picks = []
@@ -1602,13 +1714,18 @@ def render_folded(games):
         aw = hs is not None and as_ is not None and as_ > hs
         a_sty = f"color:{COLOR_TEXT};font-weight:bold;" if aw else "color:#a8a8a8;"
         h_sty = f"color:{COLOR_TEXT};font-weight:bold;" if hw else "color:#a8a8a8;"
+        rating = rate_game(g)
+        rating_html = (
+            f'<span style="color:{rating["color"]};padding-left:8px;font-weight:bold;">'
+            f'{esc(rating["name"])}</span>' if rating["key"] else ""
+        )
         rows.append(
             f'<div style="font-size:12px;line-height:2.0;font-family:{FONT};">'
             f'<span style="{a_sty}">{esc(cn_team(away["name_en"], TEAM_MAP))}</span>'
             f'<span style="color:{COLOR_ACCENT};padding:0 6px;">'
             f'{esc(as_ if as_ is not None else "-")}-{esc(hs if hs is not None else "-")}</span>'
             f'<span style="{h_sty}">{esc(cn_team(home["name_en"], TEAM_MAP))}</span>'
-            f'</div>'
+            f'{rating_html}</div>'
         )
     return (
         '<div style="margin:24px 0 0;padding:14px 16px;background:#fafafa;">'
@@ -1644,9 +1761,28 @@ def render_game(g, label_key=None, highlight=None, watch_note=None):
 
     parts = []
 
-    # 绝杀 / 准绝杀：整篇里最该被看见的一行，所以单独用深红徽章压在队名上方
+    # 卡片第一行永远是评级，后面的绝杀/标签都排在它后面。
+    # 理由只写一句：推荐场用「值得看 · xxx」，其余场用评级自己的数据理由；
+    # 绝杀 detail 或「今日最X」标签已经把话说完的就不重复。
+    rating = rate_game(g)
     clutch = clutch_text(g)
     badges = []
+    if rating["key"]:
+        reason, reason_color = "", COLOR_MUTED
+        if watch_note and label_key not in LABELS:
+            reason, reason_color = f"值得看 · {watch_note}", COLOR_ACCENT
+        elif not clutch and label_key not in LABELS:
+            reason = rating["reason"]
+        reason_html = (
+            f'<span style="font-size:11px;line-height:1.6;color:{reason_color};'
+            f'padding-left:6px;margin-right:9px;font-family:{FONT};">{esc(reason)}</span>'
+            if reason else ""
+        )
+        badges.append(
+            f'<span style="display:inline-block;font-size:11px;line-height:1.6;color:#ffffff;'
+            f'background:{rating["color"]};padding:2px 9px;letter-spacing:1px;font-weight:bold;'
+            f'margin-right:5px;font-family:{FONT};">{esc(rating["name"])}</span>{reason_html}'
+        )
     if clutch:
         badges.append(
             f'<span style="display:inline-block;font-size:11px;line-height:1.6;color:#ffffff;'
@@ -1667,13 +1803,6 @@ def render_game(g, label_key=None, highlight=None, watch_note=None):
         )
         parts.append(
             f'<div style="margin:0 0 8px 0;">{"".join(badges)}{detail}</div>'
-        )
-    elif watch_note:
-        # 排进推荐区但没有抢到标签的场次，用一句话交代它凭什么排前面。
-        # 有标签的不写，否则「今日最大逆转」下面再挂「落后 17 分翻盘」就是同一句话说两遍。
-        parts.append(
-            f'<div style="margin:0 0 8px 0;font-size:11px;color:{COLOR_ACCENT};'
-            f'letter-spacing:1px;font-family:{FONT};">值得看 · {esc(watch_note)}</div>'
         )
 
     # 顶部队名 + 比分
@@ -2110,9 +2239,11 @@ def render_page(games, game_date, display_date, tomorrow=None):
   <div style="font-size:24px;font-weight:bold;color:{COLOR_TEXT};margin-bottom:4px;">{esc(display_date)}<span style="font-size:12px;font-weight:normal;color:#a0a0a0;padding-left:7px;">美国时间</span></div>
   <div style="font-size:13px;color:{COLOR_MUTED};margin-bottom:24px;">共 {total} 场 ｜ 每行格式：客队 比分 : 比分 主队</div>
 
-  <div style="font-size:15px;line-height:1.9;color:{COLOR_TEXT};background:#fdf6f0;border-left:3px solid {COLOR_ACCENT};padding:14px 16px;margin-bottom:22px;">
+  <div style="font-size:15px;line-height:1.9;color:{COLOR_TEXT};background:#fdf6f0;border-left:3px solid {COLOR_ACCENT};padding:14px 16px;">
     <div>{esc(build_lead(games))}</div>
   </div>
+
+  {render_rating_legend()}
 
   {render_focus(build_focus(games))}
 
@@ -2122,6 +2253,7 @@ def render_page(games, game_date, display_date, tomorrow=None):
 
   <div style="font-size:12px;color:#b0b0b0;line-height:1.8;margin-top:6px;">
     <span style="color:{COLOR_ACCENT};">去球吧</span> ｜ 每天一份 NBA 战报，只写场上发生的事<br>
+    评级按场上数据自动分档，是绝对标准不是当天排名；可以一整天都没有「拉完了」。<br>
     本文基于公开赛事数据独立撰写，与 NBA 及任何转播平台无关联。<br>
     比赛日 {esc(game_date)}（美国时间）｜ 数据来源：ESPN
   </div>
@@ -2215,6 +2347,7 @@ def main():
     finished = [g for g in games if g.get("finished")]
     headline = pick_headline(finished)
     labels = assign_labels(finished)
+    ratings = {g["id"]: rate_game(g) for g in finished}
     best = pick_best_action(finished)
     # 封面图用头条那场：队名、比分、两队官方主色（ESPN 的 team.color）
     cover = None
@@ -2239,6 +2372,11 @@ def main():
         "game_date": str(game_date),
         "generated_at": datetime.now(BJ_TZ).isoformat(timespec="seconds"),
         "total_games": len(finished),
+        "rating_scale": [name for _, name, _ in RATINGS],
+        "rating_counts": {
+            name: sum(1 for r in ratings.values() if r["name"] == name)
+            for _, name, _ in RATINGS
+        },
         "postseason": any(g.get("postseason") for g in finished),
         "headline": (
             f'{cn_team(headline["away"]["name_en"], TEAM_MAP)} '
@@ -2265,6 +2403,7 @@ def main():
             "away_score": g["away"]["score"],
             "home_score": g["home"]["score"],
             "label": LABELS[labels[g["id"]]][0] if g["id"] in labels else None,
+            "rating": {k: ratings[g["id"]][k] for k in ("key", "name", "reason")},
             "series": series_text(g),
             # 加时数：单节比分表长度 - 4。头条素材里「加时」是个强钩子，单独存一份
             "overtimes": max(
