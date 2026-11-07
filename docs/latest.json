@@ -1,6 +1,6 @@
 {
   "game_date": "2026-11-06",
-  "generated_at": "2026-11-07T18:42:45+08:00",
+  "generated_at": "2026-11-07T19:05:48+08:00",
   "total_games": 9,
   "rating_scale": [
     "夯",
@@ -113,12 +113,12 @@
     "footer": "全联盟 9 场|今日最胶着"
   },
   "best_action": {
-    "player": "艾顿",
-    "kind": "alley",
-    "dist_ft": null,
-    "period": 4,
-    "clock_sec": 462.0,
-    "game": "奇才 132-139 老鹰"
+    "player": "东契奇",
+    "kind": "three",
+    "dist_ft": 62,
+    "period": 2,
+    "clock_sec": 0.0,
+    "game": "开拓者 118-124 湖人"
   },
   "tomorrow": {
     "date": "2026-11-07",

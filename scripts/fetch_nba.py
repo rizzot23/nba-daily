@@ -435,7 +435,10 @@ def extract_actions(plays, athletes, game):
             kind = "dunk"
         elif "block" in typ:
             kind = "block"
-        elif "three point" in txt:
+        elif "three point" in txt or (p.get("scoreValue") == 3 and "makes" in txt):
+            # 超远压哨球 ESPN 会写成 "makes 62-foot jump bank shot"，
+            # 不带 three point 字样但 scoreValue=3 确实是三分。
+            # 11-06 卢卡半场 62 英尺打板就是这么被漏掉的。
             kind = "three"
         else:
             continue
@@ -2217,7 +2220,7 @@ def render_best_action(g, a):
     if a["kind"] == "clutch":
         when = "加时" if a["period"] > 4 else "第四节结束"
     elif clock is not None and clock <= 1:
-        when = "压哨"
+        when = "加时压哨" if a["period"] > 4 else f'第 {a["period"]} 节压哨'
     elif a["period"] > 4:
         when = f'加时 剩 {fmt_clock(clock)}'
     else:
