@@ -1207,7 +1207,7 @@ def render_breakouts(breakouts):
     return (
         f'<div style="margin:14px 0 0;padding-top:11px;border-top:1px dashed #eadfd4;">'
         f'<div style="font-size:12px;font-weight:bold;color:{COLOR_ACCENT};'
-        f'letter-spacing:1px;font-family:{FONT};">今日炸裂 · 临时上榜'
+        f'letter-spacing:1px;font-family:{FONT};">今日炸裂表现上榜'
         f'<span style="font-size:11px;color:#b0b0b0;font-weight:normal;'
         f'letter-spacing:0;padding-left:8px;">{len(breakouts)} 人</span></div>'
         + "".join(sub)
