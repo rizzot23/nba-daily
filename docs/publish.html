@@ -61,12 +61,12 @@
 <div class="wrap">
 
   <h1>去球吧 · 发布台</h1>
-  <p class="sub">每天打开这一页就够了。下面的内容都是实时读取线上战报生成的，15:30 之后自动换成当天新一期，不用重新发链接。</p>
+  <p class="sub">每天打开这一页就够了。下面的内容都是实时读取线上战报生成的，下午自动换成当天新一期，不用重新发链接。</p>
 
   <div class="status">
     <div class="date" id="st-date">读取中…</div>
     <div class="meta" id="st-meta"></div>
-    <div class="warn" id="st-warn">已过 15:45，这一期还不是今天生成的。去仓库 Actions 页手动 Run workflow 一次，或等 16:40 的补拉。</div>
+    <div class="warn" id="st-warn">已过 15:40，这一期还不是今天生成的。去仓库 Actions 页手动 Run workflow 一次，或等 16:51 的补拉。</div>
   </div>
 
   <h2>1 · 主条：完整战报</h2>
@@ -134,7 +134,7 @@
 
   <div class="foot">
     发布台是静态页，不写任何内容，读的是同目录的 latest.json / feature.json / feature.md / report.html。<br>
-    定时任务（北京 15:30 首拉、16:40 补拉）跑完后，这一页和战报会一起更新。
+    定时任务（北京 15:23 首拉、16:51 补拉）跑完后，这一页和战报会一起更新。
   </div>
 
 </div>
@@ -197,8 +197,8 @@ function addTitleRow(label, value) {
     const todayStr = today.getFullYear() + '-' +
       String(today.getMonth() + 1).padStart(2, '0') + '-' +
       String(today.getDate()).padStart(2, '0');
-    // 战报按美国比赛日生成，北京上午本来就不该有新一期；过了 15:45 还没换才提示。
-    const due = today.getHours() * 60 + today.getMinutes() >= 15 * 60 + 45;
+    // 战报按美国比赛日生成，北京上午本来就不该有新一期；过了 15:40 还没换才提示。
+    const due = today.getHours() * 60 + today.getMinutes() >= 15 * 60 + 40;
     if (gen && due && gen !== todayStr) $('st-warn').style.display = 'block';
 
     // 标题候选：主条带队名，次条/头条从提纲里取
