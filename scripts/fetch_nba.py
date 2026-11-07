@@ -1209,8 +1209,6 @@ def render_breakouts(breakouts):
         f'letter-spacing:1px;font-family:{FONT};">今日炸裂 · 临时上榜'
         f'<span style="font-size:11px;color:#b0b0b0;font-weight:normal;'
         f'letter-spacing:0;padding-left:8px;">{len(breakouts)} 人</span></div>'
-        f'<div style="font-size:11px;color:#a8a8a8;line-height:1.8;margin:2px 0 4px;">'
-        f'不在固定追踪名单里，当天达到硬门槛才出现；没有就不写。</div>'
         + "".join(sub)
         + f'</div>'
     )
