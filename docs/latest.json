@@ -1,6 +1,6 @@
 {
   "game_date": "2026-11-06",
-  "generated_at": "2026-11-07T17:42:54+08:00",
+  "generated_at": "2026-11-07T18:42:45+08:00",
   "total_games": 9,
   "rating_scale": [
     "夯",
@@ -11,11 +11,11 @@
     "拉完了"
   ],
   "rating_counts": {
-    "夯": 1,
-    "顶级": 2,
-    "人上人": 3,
+    "夯": 2,
+    "顶级": 1,
+    "人上人": 1,
     "NPC": 0,
-    "拉": 0,
+    "拉": 2,
     "拉完了": 3
   },
   "postseason": false,
@@ -242,9 +242,9 @@
       "home_score": 112,
       "label": null,
       "rating": {
-        "key": "B",
-        "name": "人上人",
-        "reason": "从落后 8 分打回来"
+        "key": "D",
+        "name": "拉",
+        "reason": "赢 12 分，末节没缠斗"
       },
       "series": null,
       "overtimes": 0,
@@ -288,9 +288,9 @@
       "home_score": 107,
       "label": "今日最大逆转",
       "rating": {
-        "key": "S",
-        "name": "夯",
-        "reason": "落后 15 分翻盘"
+        "key": "A",
+        "name": "顶级",
+        "reason": "落后 15 分翻盘，但最后拉开到 14 分"
       },
       "series": null,
       "overtimes": 0,
@@ -311,9 +311,9 @@
       "home_score": 109,
       "label": "今日最胶着",
       "rating": {
-        "key": "A",
-        "name": "顶级",
-        "reason": "交替领先 13 次"
+        "key": "S",
+        "name": "夯",
+        "reason": "末节咬了 8 分钟，最后只差 6 分"
       },
       "series": null,
       "overtimes": 0,
@@ -332,11 +332,11 @@
       "home": "湖人",
       "away_score": 118,
       "home_score": 124,
-      "label": "今日最功亏一篑",
+      "label": "今日最惊险",
       "rating": {
-        "key": "A",
-        "name": "顶级",
-        "reason": "落后 14 分翻盘"
+        "key": "S",
+        "name": "夯",
+        "reason": "落后 14 分翻盘，最后只差 6 分"
       },
       "series": null,
       "overtimes": 0,
@@ -357,9 +357,9 @@
       "home_score": 109,
       "label": null,
       "rating": {
-        "key": "B",
-        "name": "人上人",
-        "reason": "交替领先 10 次"
+        "key": "D",
+        "name": "拉",
+        "reason": "赢 15 分，末节没缠斗"
       },
       "series": null,
       "overtimes": 0,

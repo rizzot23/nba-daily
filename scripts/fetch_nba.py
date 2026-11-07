@@ -870,7 +870,7 @@ def pick_headline(played):
 LABELS = {
     "drama": ("今日最胶着", "#c2410c"),
     "comeback": ("今日最大逆转", "#1d6fa5"),
-    "fallen": ("今日最功亏一篑", "#7a4b8f"),
+    "fallen": ("今日最惊险", "#7a4b8f"),
     "flat": ("今日最平淡", "#9a9a9a"),
 }
 
@@ -884,7 +884,8 @@ def assign_labels(played):
     判定都用可复核的数据，不靠主观：
       最胶着   —— 激烈度得分最高
       最大逆转 —— 胜方落后分差最大，且至少 10 分
-      最功亏一篑 —— 一度落后 10 分以上、末节追到 5 分内却仍输球
+      最惊险     —— 胜方一度领先 10 分以上，末节还被追到 5 分内，最后只赢几分
+                    （旧文案「最功亏一篑」说反了：赢球方谈不上功亏一篑）
       最平淡   —— 激烈度最低，且分差上两位数、末节几乎没缠斗过
     """
     out = {}
@@ -1418,24 +1419,43 @@ def rate_game(g):
 
     # 好看的场次 = 推荐区。先过准入，再在里面挑出「夯」，
     # 这样「夯 / 顶级」必然都进推荐区，不会出现评成夯却没被推荐。
+    #
+    # 「夯」的第一道闸门是结局：最后拉开到两位数，哪怕过程再热闹也只是
+    # 「顶级」。11-06 猛龙 121-107 雄鹿落后 15 分翻盘、末节咬过 384 秒，
+    # 收尾却被拉开到 14 分；同日森林狼、湖人最后都只差 6 分，进夯。
+    # 末节的精彩程度不是加分项，是能不能进最高档的分水岭。
     if watch_ok(g, margin):
-        if cl and cl.get("kind") == "buzzer":
-            return r("S", "压哨绝杀")
-        if cl:
-            return r("S", f"最后 {int(round(cl.get('clock') or 0))} 秒反超")
-        if ot:
-            return r("S", "加时才分出胜负" if ot == 1 else f"{ot} 个加时才分出胜负")
-        if cb >= 15:
-            return r("S", f"落后 {cb} 分翻盘")
-        if margin <= 5 and score >= 150 and close >= 360:
-            return r("S", "从头咬到最后一秒")
-        return r("A", watch_reason(g, margin))
+        if margin <= 8:
+            if cl and cl.get("kind") == "buzzer":
+                return r("S", "压哨绝杀")
+            if cl:
+                return r("S", f"最后 {int(round(cl.get('clock') or 0))} 秒反超，只差 {margin} 分")
+            if ot:
+                return r("S", "加时才分出胜负" if ot == 1 else f"{ot} 个加时才分出胜负")
+            if cb >= 12:
+                return r("S", f"落后 {cb} 分翻盘，最后只差 {margin} 分")
+            # 末节实打实咬过才算「夯」：要么大半节都在 5 分内，
+            # 要么咬了半节以上还反复易手。只有中段来回的不算。
+            mins = int(round(close / 60))
+            if close >= 360:
+                return r("S", f"末节咬了 {mins} 分钟，最后只差 {margin} 分")
+            if close >= 240 and lc >= 10:
+                return r("S", f"末节咬了 {mins} 分钟、交替领先 {lc} 次，最后只差 {margin} 分")
+        reason = watch_reason(g, margin)
+        if margin > 8:
+            reason += f"，但最后拉开到 {margin} 分"
+        return r("A", reason)
 
     # 拉完了：全程一边倒、末节全是垃圾时间。不保底，没有就没有
     if margin >= 20 and close <= 60 and lc <= 6 and score < 45:
         return r("F", f"赢 {margin} 分，全程没缠斗")
     if margin >= 25 and close <= 30:
         return r("F", f"赢 {margin} 分，从头花到尾")
+
+    # 末节是分水岭：中段再热闹，末节一秒没咬过又拉开两位数，
+    # 也不给「人上人」。11-06 爵士、马刺都是中段来回近十次、末节胶着 0 秒。
+    if margin >= 10 and close <= 60:
+        return r("D", f"赢 {margin} 分，末节没缠斗")
 
     # 人上人：没够到推荐线，但确实有东西可看。
     # cb 是「胜方曾经落后多少」，不是输方追分，措辞别写反。
@@ -1454,7 +1474,7 @@ def rate_game(g):
 
     # 拉：早早花了，但没到惨案
     if margin >= 12 and close <= 120:
-        return r("D", f"赢 {margin} 分，末节没缠斗")
+        return r("D", f"赢 {margin} 分，末节没咬住")
     if margin >= 15 and close <= 180:
         return r("D", f"赢 {margin} 分")
 
