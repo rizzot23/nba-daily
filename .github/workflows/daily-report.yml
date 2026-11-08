@@ -60,43 +60,65 @@ jobs:
 
       # 数据来自 ESPN 公开接口，不需要任何 Key。
       # BALLDONTLIE_API_KEY 只是 ESPN 万一改接口时的比分兜底，没配也能跑。
-      # 所有定时档共用的出稿前检查：比赛日只要还有一场没终场，整档跳过、不碰 docs/。
-      # 起因：GitHub schedule 会延迟投递，晚间档（当时 19:20）曾拖到次日 00:16 才跑，那时当天的
-      # 比赛还没开打，脚本排除未终场场次后推了一份 0 场空战报上线，覆盖掉前一天的完整版。
-      # 手动 Run workflow 不检查（gate 被跳过、output 为空，下面条件为真），方便补跑指定日期。
-      - name: 出稿前检查（比赛日是否全部终场）
+      # 所有定时档共用的出稿前检查，两条硬规矩：
+      # ① 比赛日只要还有一场没终场，绝不出稿、不碰 docs/。
+      #    起因：GitHub schedule 会延迟投递，晚间档曾拖到次日 00:16 才跑，那时当天比赛还没开打，
+      #    脚本排除未终场场次后推了一份 0 场空战报上线，覆盖掉前一天的完整版。
+      # ② 不再死认「北京时间昨天」这一个日期。GitHub 白天常常一档都不投递，只在深夜/凌晨投递，
+      #    那时北京日期已翻页，按老口径取到的比赛日还没开打 → 整档跳过，缺的那期就永远补不上。
+      #    改成从「北京昨天」往前最多回看 3 天，挑第一个「全部终场且线上还没发」的比赛日补出。
+      #    线上已经是这一期时直接跳过，避免每次延迟投递都重推一份只差生成时间的版本。
+      # 手动 Run workflow 不走这个检查（gate 被跳过、output 为空），方便补跑指定日期。
+      - name: 出稿前检查（挑最近一个全部终场且未发布的比赛日）
         id: gate
         if: github.event_name == 'schedule'
         run: |
           python - <<'PY'
-          import json, os, urllib.request, datetime
+          import json, os, pathlib, urllib.request, datetime
 
-          # 口径与 fetch_nba.py 默认一致：北京时间今天减一天 = 美国比赛日
           bj = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=8)
-          day = (bj.date() - datetime.timedelta(days=1)).strftime("%Y%m%d")
-          url = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates=" + day
-          go = "true"
+          today = bj.date()
           try:
-              with urllib.request.urlopen(url, timeout=25) as r:
-                  data = json.load(r)
+              published = json.loads(pathlib.Path("docs/latest.json").read_text(encoding="utf-8")).get("game_date", "")
+          except Exception:
+              published = ""
+          print("线上已发布比赛日:", published or "(读不到)")
+
+          go, picked = "false", ""
+          for back in (1, 2, 3):
+              day = today - datetime.timedelta(days=back)
+              iso, ymd = day.isoformat(), day.strftime("%Y%m%d")
+              url = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates=" + ymd
+              try:
+                  with urllib.request.urlopen(url, timeout=25) as r:
+                      data = json.load(r)
+              except Exception as ex:
+                  print("ESPN 记分板拉取失败，整档跳过：", ex)
+                  break
               evs = data.get("events", [])
               pending = [e.get("shortName", e.get("name", "?")) for e in evs
                          if not e["competitions"][0].get("status", {}).get("type", {}).get("completed")]
-              print("比赛日", day, "共", len(evs), "场 / 未终场", len(pending), "场", pending)
+              print(f"候选 {iso}: 共 {len(evs)} 场 / 未终场 {len(pending)} 场")
               if pending:
-                  go = "false"
-          except Exception as ex:
-              print("ESPN 记分板拉取失败，整档跳过：", ex)
-              go = "false"
+                  continue                      # 这天还没打完，继续往前看一天
+              if published and iso <= published:
+                  print("线上已是这一期（或更新），不重复出稿")
+                  break
+              picked, go = iso, "true"
+              break
+
           with open(os.environ["GITHUB_OUTPUT"], "a") as f:
               f.write("go=" + go + "\n")
-          print("检查通过，开始出稿" if go == "true" else "整档跳过，页面保留上一期战报")
+              f.write("game_date=" + picked + "\n")
+          print("补出 " + picked if go == "true" else "整档跳过，页面保留上一期战报")
           PY
 
       - name: 生成战报
         if: steps.gate.outputs.go != 'false'
         env:
-          REPORT_GAME_DATE: ${{ inputs.game_date }}
+          # 定时档用 gate 挑出来的比赛日（可能往前补一天）；手动档用输入框的值，
+          # 留空时 fetch_nba.py 自己取「北京时间昨天」。
+          REPORT_GAME_DATE: ${{ steps.gate.outputs.game_date || inputs.game_date }}
           BALLDONTLIE_API_KEY: ${{ secrets.BALLDONTLIE_API_KEY }}
         run: |
           echo "运行时间：$(date '+%Y-%m-%d %H:%M %Z')"
