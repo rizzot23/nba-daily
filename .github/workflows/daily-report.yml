@@ -1,4 +1,4 @@
-name: 去球吧 每日战报
+name: 一球不落 每日战报
 
 on:
   schedule:
@@ -138,7 +138,7 @@ jobs:
               print("去看上面的「生成战报」步骤日志。")
               raise SystemExit
           d = json.loads(p.read_text(encoding="utf-8"))
-          print(f"### 去球吧 · {d['game_date']}（美国时间）\n")
+          print(f"### 球不落 · {d['game_date']}（美国时间）\n")
           print(f"- 生成时间：{d['generated_at']}")
           print(f"- 完场场次：{d.get('total_games', 0)} 场")
           if d.get("headline"):

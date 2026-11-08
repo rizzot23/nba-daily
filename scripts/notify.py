@@ -61,9 +61,9 @@ def build_message(d):
     day = cn_date(d.get("game_date", ""))
     n = d.get("total_games") or 0
     if n:
-        title = f"去球吧 · {day} {n} 场"
+        title = f"球不落 · {day} {n} 场"
     else:
-        title = f"去球吧 · {day} 无比赛"
+        title = f"球不落 · {day} 无比赛"
 
     lines = []
     if d.get("lead"):

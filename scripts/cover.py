@@ -172,10 +172,10 @@ def build():
         return draw.textbbox((0, 0), text, font=font)
 
     # 左上角橙底白字标签是品牌位，后面跟一行灰色小字说明品类 ——
-    # 只写「去球吧」，划过信息流的人看不出这是篮球号；只写「NBA 每日战报」，
+    # 只写「球不落」，划过信息流的人看不出这是篮球号；只写「NBA 每日战报」，
     # 又白浪费一块最显眼的位置。两个都要，但主次要分明，所以品牌用橙底实心。
     top_y = 44
-    label = "去球吧"
+    label = "球不落"
     lw = draw.textlength(label, small)
     lb = ink_box(label, small)
     pad_x = 13

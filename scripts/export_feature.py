@@ -31,7 +31,7 @@ TARGET = OUT_DIR / "feature.md"
 BRIEF = OUT_DIR / "feature.json"
 PLAYERS_FILE = BASE_DIR / "players_zh.json"
 
-BRAND = "去球吧"
+BRAND = "球不落"
 TITLE_LIMIT = 30          # 头条图文标题上限，按字符算
 
 

@@ -2780,13 +2780,13 @@ def render_page(games, game_date, display_date, tomorrow=None):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>去球吧 · {esc(display_date)} 战报</title>
+<title>球不落 · {esc(display_date)} 战报</title>
 </head>
 <body style="margin:0;padding:0;background:#fafafa;">
 
 <div style="max-width:640px;margin:0 auto;padding:30px 20px 44px;background:#ffffff;font-family:{FONT};">
 
-  <div style="font-size:12px;color:{COLOR_ACCENT};letter-spacing:1px;margin-bottom:6px;">去球吧<span style="color:#b8b8b8;padding:0 6px;">·</span>NBA 每日战报</div>
+  <div style="font-size:12px;color:{COLOR_ACCENT};letter-spacing:1px;margin-bottom:6px;">球不落<span style="color:#b8b8b8;padding:0 6px;">·</span>NBA 每日战报</div>
   <div style="font-size:24px;font-weight:bold;color:{COLOR_TEXT};margin-bottom:4px;">{esc(display_date)}<span style="font-size:12px;font-weight:normal;color:#a0a0a0;padding-left:7px;">美国时间</span></div>
   <div style="font-size:13px;color:{COLOR_MUTED};margin-bottom:24px;">共 {total} 场 ｜ 每行格式：客队 比分 : 比分 主队</div>
 
@@ -2803,7 +2803,7 @@ def render_page(games, game_date, display_date, tomorrow=None):
   {render_tomorrow(tomorrow)}
 
   <div style="font-size:12px;color:#b0b0b0;line-height:1.8;margin-top:6px;">
-    <span style="color:{COLOR_ACCENT};">去球吧</span> ｜ 每天一份 NBA 战报，只写场上发生的事<br>
+    <span style="color:{COLOR_ACCENT};">球不落</span> ｜ 每天一份 NBA 战报，只写场上发生的事<br>
     本文基于公开赛事数据独立撰写，与 NBA 及任何转播平台无关联。<br>
     比赛日 {esc(game_date)}（美国时间）｜ 数据来源：ESPN
   </div>
