@@ -1,6 +1,6 @@
 {
   "game_date": "2026-11-07",
-  "generated_at": "2026-11-08T20:12:05+08:00",
+  "generated_at": "2026-11-08T20:26:17+08:00",
   "total_games": 7,
   "rating_scale": [
     "夯",
@@ -111,23 +111,13 @@
       "team": "篮网",
       "opp": "老鹰",
       "result": "负"
-    },
-    {
-      "cn": "戴森·丹尼尔斯",
-      "reason": "6 次抢断",
-      "rank": 7,
-      "pts": "9",
-      "reb": "10",
-      "ast": "7",
-      "team": "老鹰",
-      "opp": "篮网",
-      "result": "胜"
     }
   ],
   "records": [
     {
       "cn": "35 岁后第 16 次 40+ 分，NBA 历史最多",
       "who": "库里",
+      "team": "",
       "kind": "球星",
       "game": "魔术 119-126 勇士",
       "source": "It was his 16th 40-point effort after age 35, most in NBA history."
@@ -135,6 +125,7 @@
     {
       "cn": "把对手压到本赛季全联盟单场最低分",
       "who": "",
+      "team": "雷霆",
       "kind": "球队",
       "game": "奇才 75-114 雷霆",
       "source": "— Shai Gilgeous-Alexander scored 30 points in three quarters and the Oklahoma City Thunder routed poor-shooting Washington 114-75 on Saturday night, holding the Wizards to the lowest total in the NBA this season."
@@ -142,6 +133,7 @@
     {
       "cn": "开季 0-3 后 7 连胜，创近年最长连胜",
       "who": "",
+      "team": "勇士",
       "kind": "球队",
       "game": "魔术 119-126 勇士",
       "source": "Golden State started 0-3 and now has its longest winning streak since seven in a row from March 3-15, 2025."
@@ -149,6 +141,7 @@
     {
       "cn": "生涯第 745 场，升至太阳队史第 3",
       "who": "布克",
+      "team": "",
       "kind": "球星",
       "game": "火箭 99-102 太阳",
       "source": "Booker played in his 745th career game on Saturday, passing Steve Nash for third place in Suns history."
@@ -156,6 +149,7 @@
     {
       "cn": "生涯首个三双",
       "who": "戴龙·夏普",
+      "team": "",
       "kind": "球星",
       "game": "篮网 121-124 老鹰",
       "source": "Day'Ron Sharpe had 12 points, 13 assists and 10 rebounds for hist first career triple-double."
@@ -163,6 +157,7 @@
     {
       "cn": "赛季首次连胜",
       "who": "",
+      "team": "太阳",
       "kind": "球队",
       "game": "火箭 99-102 太阳",
       "source": "Booker scores 24, Suns outlast Rockets 102-99 for 1st back-to-back wins of season"
@@ -170,6 +165,7 @@
     {
       "cn": "生涯首个两双",
       "who": "杨瀚森",
+      "team": "",
       "kind": "球星",
       "game": "马刺 125-103 开拓者",
       "source": "Yang Hansen had his first career double-double with 12 points and 10 rebounds."

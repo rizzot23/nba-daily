@@ -1050,15 +1050,17 @@ def breakout_reasons(p, qpts):
         out.append((2, f"三双 {pts}分 {reb}板 {ast}助"))
     if 40 <= pts < 50:
         out.append((3, f"轰下 {pts} 分"))
-    if tpm >= 8:
+    # 用户 2026-11-08 要求把标准再抬高：三分 9 记起、抢断 7 次起。
+    # 抢断和盖帽原本共用一条 ≥6，一并提到 7，免得同一档里两个数字打架。
+    if tpm >= 9:
         out.append((4, f"{tpm} 记三分"))
     if reb >= 20:
         out.append((5, f"{reb} 个篮板"))
     if ast >= 18:
         out.append((6, f"{ast} 次助攻"))
-    if stl >= 6:
+    if stl >= 7:
         out.append((7, f"{stl} 次抢断"))
-    if blk >= 6:
+    if blk >= 7:
         out.append((8, f"{blk} 记盖帽"))
     return sorted(out)
 
@@ -1326,6 +1328,40 @@ def _record_who(sentence, headline):
     return find(headline)
 
 
+def _record_team(sentence, game):
+    """球队类记录要写清「哪支球队」：先认英文原句里的主体，认不出退回该场胜方。
+
+    只按「出现位置最靠前」取，和人名同一套思路：
+      "the Oklahoma City Thunder routed ... Washington ... the Wizards" -> 雷霆
+      "Suns outlast Rockets"                                          -> 太阳
+      "Golden State started 0-3"                                      -> 勇士（城市名命中）
+    球队纪录绝大多数属于赢球方，句子只写代词时退回胜方比空着强。
+    """
+    low = normalize_name(sentence)
+    hits = []
+    for en, cn in (globals().get("TEAM_MAP") or {}).items():
+        words = normalize_name(en).split()
+        if len(words) < 2:
+            continue
+        # 完整名 > 城市名（Golden State / Oklahoma City）> 队名尾巴（Suns / Rockets）
+        for pattern, prio in (
+            (" ".join(words), 0),
+            (" ".join(words[:-1]), 1),
+            (words[-1], 2),
+        ):
+            if len(pattern) < 4:
+                continue
+            m = re.search(r"\b" + re.escape(pattern) + r"\b", low)
+            if m:
+                hits.append((m.start(), prio, cn))
+                break
+    if hits:
+        hits.sort(key=lambda x: (x[0], x[1]))
+        return hits[0][2]
+    win = "away" if (game["away"]["score"] or 0) > (game["home"]["score"] or 0) else "home"
+    return cn_team(game[win]["name_en"], TEAM_MAP)
+
+
 def _record_cn(sentence, headline=""):
     """一句英文战报 -> (稀罕度, 类型, 中文要点)。认不出返回 None，绝不硬凑。
 
@@ -1454,8 +1490,9 @@ def build_records(games):
                 continue
             seen.add(key)
             who = _record_who(sent, headline) if kind == "球星" else ""
+            team = "" if kind == "球星" else _record_team(sent, g)
             hits.append({
-                "cn": cn, "who": who, "kind": kind, "game": label,
+                "cn": cn, "who": who, "team": team, "kind": kind, "game": label,
                 "source": sent[:220], "_rank": rank,
             })
         hits.sort(key=lambda r: r["_rank"])
@@ -1467,28 +1504,48 @@ def build_records(games):
 
 
 def render_records(records):
-    """焦点球星区下方的「今日破纪录」子块；没有就整块不渲染。"""
+    """「今日破纪录」子块：球星 / 球队分组写，没有就整块不渲染。
+
+    分组后每行不再重复挂「球星」「球队」小徽章 —— 组标题已经说清了，
+    每行要补的是主体：球星写人名，球队写清是哪支队。
+    """
     if not records:
         return ""
-    rows = []
-    for r in records:
-        head = f'{esc(r["who"])} · ' if r.get("who") else ""
-        rows.append(
+
+    def row(r):
+        who = r.get("who") or r.get("team") or ""
+        head = f"{who} · " if who else ""
+        return (
             f'<div style="font-size:13px;line-height:2.2;color:{COLOR_TEXT};font-family:{FONT};">'
-            f'<span style="display:inline-block;font-size:11px;color:{COLOR_ACCENT};'
-            f'border:1px solid #eadfd4;padding:0 6px;margin-right:7px;">{esc(r["kind"])}</span>'
             f'<span style="font-weight:700;">{esc(head + r["cn"])}</span>'
             f'<span style="font-size:11.5px;color:#9a9a9a;padding-left:7px;">'
             f'· {esc(r["game"])}</span>'
             f'</div>'
         )
+
+    groups = []
+    for kind in ("球星", "球队"):
+        group = [r for r in records if r.get("kind") == kind]
+        if not group:
+            continue
+        groups.append(
+            f'<div style="margin-top:7px;">'
+            f'<div style="margin-bottom:2px;font-family:{FONT};">'
+            f'<span style="display:inline-block;font-size:11px;color:{COLOR_ACCENT};'
+            f'border:1px solid #eadfd4;padding:0 6px;">{kind}</span>'
+            f'<span style="font-size:11px;color:#b0b0b0;padding-left:6px;">'
+            f'{len(group)} 条</span></div>'
+            + "".join(row(r) for r in group)
+            + f'</div>'
+        )
+
     return (
         f'<div style="margin:0 0 24px;padding-top:11px;border-top:1px dashed #eadfd4;">'
         f'<div style="font-size:12px;font-weight:bold;color:{COLOR_ACCENT};'
         f'letter-spacing:1px;font-family:{FONT};margin-bottom:3px;">今日破纪录'
         f'<span style="font-size:11px;color:#b0b0b0;font-weight:normal;'
         f'letter-spacing:0;padding-left:8px;">{len(records)} 条</span></div>'
-        + "".join(rows)
+        + "".join(groups)
         + f'</div>'
     )
 
