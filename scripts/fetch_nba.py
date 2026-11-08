@@ -778,6 +778,13 @@ def enrich_with_summary(game, summary, mapping):
     if venue:
         game["venue"] = venue
 
+    # 战报正文只留三段文本供「今日破纪录」抽取，别把整个 article 对象塞进 game
+    art = summary.get("article") or {}
+    if isinstance(art, dict):
+        game["article_text"] = {
+            k: art.get(k) or "" for k in ("headline", "description", "story")
+        }
+
     plays = summary.get("plays") or []
     athletes = {p["id"]: p["name"] for p in game["roster"] if p.get("id")}
     # 单节得分只在这里算一次，后面「今日炸裂」直接读，不再重新解析 plays
@@ -856,7 +863,13 @@ def build_hook(g, is_headline=False):
 
 
 def pick_headline(played):
-    """选当日最胶着的一场。绝杀场优先 —— 那是当天最不可替代的瞬间。"""
+    """选当日最值得放头条的一场。
+
+    激烈度打底，绝杀和加时各加 60：观众记住的是「打到加时」「最后一球」，
+    不是交替领先多几次。11-07 勇士加时、激烈度 151，火箭没加时、201.9，
+    加时加成让勇士 211 上位 —— 结局咬得紧又多打一节，比全程来回更值得放头条。
+    两种加成可叠加：加时绝杀本来就是当天最不可替代的那场。
+    """
     if not played:
         return None
     scored = [g for g in played if (g.get("drama") or {}).get("ok")]
@@ -865,7 +878,7 @@ def pick_headline(played):
 
     def rank(g):
         dr = g["drama"]
-        return dr["score"] + (60 if dr.get("clutch") else 0)
+        return dr["score"] + (60 if dr.get("clutch") else 0) + (60 if overtimes(g) else 0)
 
     return max(scored, key=rank)
 
@@ -1003,8 +1016,12 @@ def build_lead(games):
         facts.append(f"{win_cn}一度落后 {cb} 分")
 
     tail = "，".join(facts) if facts else f"最终 {margin} 分差"
+    # 头条现在会靠加时加成上位，未必是全天激烈度最高的那场。
+    # 「今日最胶着」徽章仍按激烈度单独发，导语再说「最胶着的是」会自己打脸。
+    peak = max(((g.get("drama") or {}).get("score") or 0) for g in played)
+    opener = "最胶着的是" if (dr.get("score") or 0) >= peak else "最值得看的是"
     return (
-        f"今天 {len(played)} 场，最胶着的是{away_cn} {as_}-{hs} {home_cn}：{tail}。"
+        f"今天 {len(played)} 场，{opener}{away_cn} {as_}-{hs} {home_cn}：{tail}。"
     )
 
 
@@ -1214,6 +1231,264 @@ def render_breakouts(breakouts):
         f'<span style="font-size:11px;color:#b0b0b0;font-weight:normal;'
         f'letter-spacing:0;padding-left:8px;">{len(breakouts)} 人</span></div>'
         + "".join(sub)
+        + f'</div>'
+    )
+
+
+# ---------------------------------------------------------------- 今日破纪录
+
+# 口径（用户 2026-11-08 定）：只把当天 ESPN 战报里「明写」的纪录 / 里程碑
+# 关键句抽出来，不自己算连胜场数、不查排名接口、不建历史纪录对照表。
+# ESPN 没写的（例如「平了 1950-51 凯尔特人的纪录」）一律不补，也不推断。
+# 抽到就显示，抽不到整块不写；页面不放规则说明，英文原句留在
+# latest.json 的 records[].source 里供复核。
+RECORD_MAX = 8
+RECORD_PER_GAME = 2
+
+_WORD_NUM = {
+    "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
+    "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11,
+    "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15,
+    "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19,
+    "twenty": 20, "first": 1, "second": 2, "third": 3, "fourth": 4,
+    "fifth": 5, "sixth": 6, "seventh": 7, "eighth": 8, "ninth": 9,
+    "tenth": 10, "eleventh": 11, "twelfth": 12,
+}
+
+
+def _word_num(word):
+    """英文数词 / 序数词 / 带逗号的阿拉伯数字统一转成整数。
+
+    不能叫 _num —— 上面已有一个把任意值转成数字的同名函数，会被覆盖。
+    """
+    s = str(word or "").strip().lower().replace(",", "")
+    if s.isdigit():
+        return int(s)
+    return _WORD_NUM.get(s)
+
+
+def _clean_text(raw):
+    s = re.sub(r"<[^>]+>", " ", str(raw or ""))
+    s = re.sub(r"&nbsp;|&amp;|&#39;", " ", s)
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def _team_cn(nick):
+    """Warriors / Rockets / Blazers 这类队名尾巴转中文，认不出就留空。"""
+    nick = str(nick or "").lower()
+    if not nick:
+        return ""
+    for en, cn in (globals().get("TEAM_MAP") or {}).items():
+        words = str(en).lower().split()
+        if words and (words[-1] == nick or (len(words) > 1 and words[-2] == nick)):
+            return cn
+    return ""
+
+
+def _record_who(sentence, headline):
+    """英文句子里出现的球员姓氏 -> 中文名。查不到就不写主体，靠场次标签定位。
+
+    代词开头的句子（"It was his 16th ..."）本身没名字，才回头去同场 headline
+    里找；句子开头已有名字的不用 headline，免得把队友的名字安到别人头上。
+    """
+    players = globals().get("PLAYER_MAP") or {}
+
+    def find(text):
+        low = normalize_name(text)
+        hits = []
+        for en, cn in players.items():
+            parts = en.split()
+            if len(parts) < 2:
+                continue
+            # 完整名优先；只按姓氏命中时记 1，让同一位置上的完整名胜出
+            m = re.search(r"\b" + re.escape(en) + r"\b", low)
+            if m:
+                hits.append((m.start(), 0, cn))
+                continue
+            surname = parts[-1]
+            if len(surname) < 4:
+                continue
+            m = re.search(r"\b" + re.escape(surname) + r"\b", low)
+            if m:
+                hits.append((m.start(), 1, cn))
+        if not hits:
+            return ""
+        # 主语通常在句首。按「出现位置」取最靠前的，别按名字长度取 ——
+        # "Doncic joined ... George Mikan" 里按长度会挑中 George，配错人。
+        hits.sort(key=lambda x: (x[0], x[1]))
+        return hits[0][2]
+
+    who = find(sentence)
+    if who:
+        return who
+    # 代词 / 分词开头的句子（"It was his 16th ..."、"giving him seven ..."）
+    # 本身没名字，才回头去同场 headline 找主角。
+    return find(headline)
+
+
+def _record_cn(sentence, headline=""):
+    """一句英文战报 -> (稀罕度, 类型, 中文要点)。认不出返回 None，绝不硬凑。
+
+    稀罕度越小越罕，只用来排显示顺序；中文要点里的每个数字都取自原句。
+    headline 只在正文提到「近年最长连胜」时用来读当前连胜数 —— 正文里的
+    "seven in a row from March 2025" 说的是去年那波旧纪录，不是这一波。
+    """
+    low = sentence.lower()
+
+    m = re.search(
+        r"(\d+)(?:st|nd|rd|th)\s+(\d+)-point\s+(?:effort|game)\s+"
+        r"after age\s+(\d+),\s*most in nba history", low,
+    )
+    if m:
+        return (0, "球星", f"{m.group(3)} 岁后第 {m.group(1)} 次 {m.group(2)}+ 分，NBA 历史最多")
+
+    m = re.search(r"nba-record run of ([\d,]+) consecutive", low)
+    if m and not re.search(r"\bended\b|\bwas snapped\b|\bbroken\b", low):
+        return (0, "球星", f"连续 {m.group(1)} 场的 NBA 纪录")
+
+    m = re.search(r"(\d+)(?:st|nd|rd|th) career game.*?for (\w+) place in (\w+) history", low)
+    if m:
+        n = _word_num(m.group(2))
+        team = _team_cn(m.group(3))
+        tail = f"，升至{team}队史第 {n}" if (n and team) else "，升至队史前列"
+        return (1, "球星", f"生涯第 {m.group(1)} 场{tail}")
+
+    m = re.search(r"career[- ]high\s+(\d+)\s+points", low)
+    if m:
+        return (1, "球星", f"生涯新高 {m.group(1)} 分")
+
+    m = re.search(r"(\d+)(?:st|nd|rd|th) career (\d+)-point game", low)
+    if m:
+        return (1, "球星", f"生涯第 {m.group(1)} 次 {m.group(2)}+ 分")
+
+    m = re.search(r"(\w+) consecutive games with at least (\d+) points", low)
+    if m:
+        n = _word_num(m.group(1)) or m.group(1)
+        return (1, "球星", f"连续 {n} 场 {m.group(2)}+ 分")
+
+    m = re.search(r"the only \w+ to score (\d+) points in (\w+) straight", low)
+    if m:
+        n = _word_num(m.group(2)) or m.group(2)
+        return (1, "球星", f"连续 {n} 场 {m.group(1)}+ 分，队史仅有的几位之一")
+
+    if "first career triple-double" in low:
+        return (2, "球星", "生涯首个三双")
+    if "first career double-double" in low:
+        return (2, "球星", "生涯首个两双")
+
+    if "longest winning streak" in low:
+        start = re.search(r"started 0-(\d+)", low)
+        # 当前连胜数只认 headline 的 "win seventh straight"；正文里的
+        # "seven in a row from March 2025" 是拿来对比的旧纪录，不能当本次数字。
+        cur = re.search(r"\b(\w+)\s+straight\b", (headline or "").lower())
+        n = _word_num(cur.group(1)) if cur else None
+        if start and n:
+            cn = f"开季 0-{start.group(1)} 后 {n} 连胜，创近年最长连胜"
+        elif n:
+            cn = f"{n} 连胜，创近年最长连胜"
+        elif start:
+            cn = f"开季 0-{start.group(1)} 后创近年最长连胜"
+        else:
+            cn = "创下近年最长连胜"
+        return (1, "球队", cn)
+
+    m = re.search(r"snapped an? (\w+)-game losing streak(?: against the (\w+))?", low)
+    if m:
+        n = _word_num(m.group(1)) or m.group(1)
+        opp = _team_cn(m.group(2)) if m.group(2) else ""
+        return (2, "球队", f"终结{'对' + opp + '的 ' if opp else ''}{n} 连败")
+
+    m = re.search(r"won (\d+) straight over (\w+)", low)
+    if m:
+        opp = _team_cn(m.group(2)) or m.group(2)
+        return (2, "球队", f"对{opp} {m.group(1)} 连胜")
+
+    if "first time this season" in low and "consecutive games" in low:
+        return (2, "球队", "赛季首次连胜")
+    if re.search(r"(?:1st|first) back-to-back wins of (?:the )?season", low):
+        return (2, "球队", "赛季首次连胜")
+    if "lowest total in the nba this season" in low:
+        return (1, "球队", "把对手压到本赛季全联盟单场最低分")
+    if "highest total in the nba this season" in low:
+        return (1, "球队", "打出本赛季全联盟单场最高分")
+    if "oldest" in low and ("history" in low or "nba" in low):
+        return (0, "球星", "刷新 NBA 历史最年长纪录")
+    if "youngest" in low and ("history" in low or "nba" in low):
+        return (0, "球星", "刷新 NBA 历史最年轻纪录")
+
+    return None
+
+
+def build_records(games):
+    """扫当天每场 ESPN 战报正文，抽出明写的纪录 / 里程碑要点。"""
+    out, seen = [], set()
+    for g in games:
+        if not g.get("finished"):
+            continue
+        art = g.get("article_text") or {}
+        headline = _clean_text(art.get("headline"))
+        # 三段各自切句再合并：headline 多数不带句号，直接拼会让标题和导语
+        # 粘成一句超长句，正则里的 .*? 就会跨段误匹配。
+        sents = []
+        for k in ("headline", "description", "story"):
+            chunk = _clean_text(art.get(k))
+            if chunk:
+                sents.extend(x for x in re.split(r"(?<=[.!?])\s+", chunk) if x.strip())
+        if not sents:
+            continue
+        label = (
+            f'{cn_team(g["away"]["name_en"], TEAM_MAP)} '
+            f'{g["away"]["score"]}-{g["home"]["score"]} '
+            f'{cn_team(g["home"]["name_en"], TEAM_MAP)}'
+        )
+        # 先收全场命中，按稀罕度排完再取名额：否则正文里先出现的
+        # 「赛季首次连胜」会把后面更有料的「升至队史第 3」挤掉。
+        hits = []
+        for sent in sents:
+            hit = _record_cn(sent, headline)
+            if not hit:
+                continue
+            rank, kind, cn = hit
+            key = (g["id"], cn)
+            if key in seen:
+                continue
+            seen.add(key)
+            who = _record_who(sent, headline) if kind == "球星" else ""
+            hits.append({
+                "cn": cn, "who": who, "kind": kind, "game": label,
+                "source": sent[:220], "_rank": rank,
+            })
+        hits.sort(key=lambda r: r["_rank"])
+        out.extend(hits[:RECORD_PER_GAME])
+    out.sort(key=lambda r: r["_rank"])
+    for r in out:
+        r.pop("_rank", None)
+    return out[:RECORD_MAX]
+
+
+def render_records(records):
+    """焦点球星区下方的「今日破纪录」子块；没有就整块不渲染。"""
+    if not records:
+        return ""
+    rows = []
+    for r in records:
+        head = f'{esc(r["who"])} · ' if r.get("who") else ""
+        rows.append(
+            f'<div style="font-size:13px;line-height:2.2;color:{COLOR_TEXT};font-family:{FONT};">'
+            f'<span style="display:inline-block;font-size:11px;color:{COLOR_ACCENT};'
+            f'border:1px solid #eadfd4;padding:0 6px;margin-right:7px;">{esc(r["kind"])}</span>'
+            f'<span style="font-weight:700;">{esc(head + r["cn"])}</span>'
+            f'<span style="font-size:11.5px;color:#9a9a9a;padding-left:7px;">'
+            f'· {esc(r["game"])}</span>'
+            f'</div>'
+        )
+    return (
+        f'<div style="margin:0 0 24px;padding-top:11px;border-top:1px dashed #eadfd4;">'
+        f'<div style="font-size:12px;font-weight:bold;color:{COLOR_ACCENT};'
+        f'letter-spacing:1px;font-family:{FONT};margin-bottom:3px;">今日破纪录'
+        f'<span style="font-size:11px;color:#b0b0b0;font-weight:normal;'
+        f'letter-spacing:0;padding-left:8px;">{len(records)} 条</span></div>'
+        + "".join(rows)
         + f'</div>'
     )
 
@@ -2464,6 +2739,8 @@ def render_page(games, game_date, display_date, tomorrow=None):
 
   {render_focus(build_focus(games), build_breakouts(games))}
 
+  {render_records(build_records(games))}
+
   {blocks}
 
   {render_tomorrow(tomorrow)}
@@ -2582,7 +2859,7 @@ def main():
             "footer": (
                 f"{len(finished)} 场季后赛" if any(g.get("postseason") for g in finished)
                 else f"全联盟 {len(finished)} 场"
-            ) + f"|{tag}",
+            ) + (f"|{tag}" if tag else ""),
         }
     summary = {
         "game_date": str(game_date),
@@ -2602,6 +2879,7 @@ def main():
         "lead": build_lead(games),
         "focus": build_focus(finished),
         "breakouts": build_breakouts(finished),
+        "records": build_records(finished),
         "cover": cover,
         "best_action": ({
             "player": cn_player(best[1]["player_en"], PLAYER_MAP) if best[1].get("player_en") else None,
