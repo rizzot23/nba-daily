@@ -2,21 +2,29 @@ name: 一球不落 每日战报
 
 on:
   schedule:
-    # ⚠️ GitHub 的 cron 一律按 UTC 算，比北京慢 8 小时
-    # 分钟数特意避开 :00 / :30 这类整点高峰 —— GitHub 排队时这些点最容易漏投或延迟
-    # UTC 06:07 = 北京 14:07（早档：最晚 11:00 开球的比赛约 13:30 终场，留 37 分钟缓冲）
-    # 四档都带「比赛日全部终场才出稿」的检查，见下面的「出稿前检查」
-    - cron: "7 6 * * *"
-    # UTC 07:23 = 北京 15:23（首拉：当天所有比赛约 13:30 前打完，留约 2 小时缓冲）
-    - cron: "23 7 * * *"
-    # UTC 08:51 = 北京 16:51（补拉：兜住三加时这种打到 15 点还没完的极端情况）
-    - cron: "51 8 * * *"
-    # UTC 11:37 = 北京 19:37（晚间兜底：GitHub 定时是「尽力而为」，新仓库头几天可能整天不投递）
-    - cron: "37 11 * * *"
+    # ⚠️ GitHub 的 cron 一律按 UTC 算，比北京慢 8 小时。
+    # 2026-11-09 实测：GitHub 的 scheduled 事件会稳定迟到 5.5~7 小时投递 ——
+    # 原本排在北京 14:07~19:37 的四档，11-08 实际落在 21:15 / 22:21 / 23:37 / 次日 01:13。
+    # 一旦拖过午夜，北京日期翻页，按「北京昨天」取到的比赛日还没开打，闸门只能跳过，
+    # 而接下来整个白天都没有第二次投递机会 → 那一期就永远补不上，只能手动 Run。
+    # 根治办法不是把某一档调早晚，而是把投递点铺满北京 14~23 点（每小时一档、仍用冷门分钟值）：
+    # 准时投递时有 15:23~23:17 九次机会，延迟 6~8 小时时仍有 20:07~23:59 四次机会落在有效窗口。
+    # 十档共用同一个幂等闸门，任一档补出后，其余档位读到线上已是这一期就自动跳过，不会重复推。
+    # 所有档位都带「比赛日全部终场才出稿」检查，见下面的「出稿前检查」。
+    - cron: "7 6 * * *"      # 北京 14:07
+    - cron: "23 7 * * *"     # 北京 15:23
+    - cron: "51 8 * * *"     # 北京 16:51
+    - cron: "13 9 * * *"     # 北京 17:13
+    - cron: "43 10 * * *"    # 北京 18:43
+    - cron: "37 11 * * *"    # 北京 19:37
+    - cron: "19 12 * * *"    # 北京 20:19
+    - cron: "29 13 * * *"    # 北京 21:29
+    - cron: "53 14 * * *"    # 北京 22:53
+    - cron: "17 15 * * *"    # 北京 23:17
   workflow_dispatch:
     inputs:
       game_date:
-        description: "比赛日 YYYY-MM-DD（美国时间），留空则自动取北京时间昨天"
+        description: "比赛日 YYYY-MM-DD（美国时间）。留空则自动找最近一个全部终场且未发布的比赛日补出；填了就强制跑这一天"
         required: false
         default: ""
 
@@ -48,46 +56,50 @@ jobs:
         with:
           python-version: "3.11"
 
-      # 封面图要画中文，需要 Pillow + 一个开源中文字体。
-      # 不能用 Windows 的微软雅黑（微软版权，进不了仓库），也装不到 Ubuntu 上。
-      # 这一步失败不影响出稿 —— cover.py 会自己跳过，战报照常生成。
-      - name: 装封面依赖
-        continue-on-error: true
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq fonts-wqy-zenhei
-          python -m pip install --quiet --disable-pip-version-check pillow
-
       # 数据来自 ESPN 公开接口，不需要任何 Key。
       # BALLDONTLIE_API_KEY 只是 ESPN 万一改接口时的比分兜底，没配也能跑。
-      # 所有定时档共用的出稿前检查，两条硬规矩：
-      # ① 比赛日只要还有一场没终场，绝不出稿、不碰 docs/。
-      #    起因：GitHub schedule 会延迟投递，晚间档曾拖到次日 00:16 才跑，那时当天比赛还没开打，
-      #    脚本排除未终场场次后推了一份 0 场空战报上线，覆盖掉前一天的完整版。
-      # ② 不再死认「北京时间昨天」这一个日期。GitHub 白天常常一档都不投递，只在深夜/凌晨投递，
-      #    那时北京日期已翻页，按老口径取到的比赛日还没开打 → 整档跳过，缺的那期就永远补不上。
-      #    改成从「北京昨天」往前最多回看 3 天，挑第一个「全部终场且线上还没发」的比赛日补出。
-      #    线上已经是这一期时直接跳过，避免每次延迟投递都重推一份只差生成时间的版本。
-      # 手动 Run workflow 不走这个检查（gate 被跳过、output 为空），方便补跑指定日期。
+      # 出稿前检查（gate）—— 根治漏投的核心，十档定时 + 手动留空的档都走它：
+      # ① 比赛日只要还有一场没终场，绝不出稿、不碰 docs/；0 场的休战日也跳过，绝不推空战报。
+      #    起因：晚间档曾拖到次日 00:16 才跑，那时当天比赛还没开打，老逻辑推了一份 0 场空战报。
+      # ② 不再死认「北京时间昨天」。从北京今天往前扫 8 天（含今天），挑第一个
+      #    「有比赛、全部终场、且线上还没发」的比赛日补出，跨午夜翻页也不影响判断。
+      # ③ 遇到已发布的日期就停手，保证幂等：任一档补出后，其余档位自动跳过，不会重复推。
+      # ④ published 同时看仓库内文件和线上 main 的最新 latest.json，防排队并发时读到旧版本。
+      # 手动 Run workflow 填了 game_date 时跳过本检查，方便强制补跑指定日期。
       - name: 出稿前检查（挑最近一个全部终场且未发布的比赛日）
         id: gate
-        if: github.event_name == 'schedule'
+        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.game_date == '') }}
         run: |
           python - <<'PY'
-          import json, os, pathlib, urllib.request, datetime
+          import json, os, pathlib, urllib.request, datetime, time
 
           bj = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=8)
           today = bj.date()
+          published = ""
           try:
               published = json.loads(pathlib.Path("docs/latest.json").read_text(encoding="utf-8")).get("game_date", "")
           except Exception:
-              published = ""
-          print("线上已发布比赛日:", published or "(读不到)")
+              pass
+          # 排队并发时 checkout 可能早于上一档的 push，再核一次线上 main，取较新的那个
+          repo = os.environ.get("GITHUB_REPOSITORY", "")
+          if repo:
+              try:
+                  u = f"https://raw.githubusercontent.com/{repo}/main/docs/latest.json?t={int(time.time())}"
+                  with urllib.request.urlopen(u, timeout=15) as r:
+                      online = json.load(r).get("game_date", "")
+                  if online and online > published:
+                      published = online
+              except Exception as ex:
+                  print("线上 latest.json 复核失败，用仓库内版本：", ex)
+          print("已发布比赛日:", published or "(读不到)")
 
           go, picked = "false", ""
-          for back in (1, 2, 3):
+          for back in range(0, 8):          # 北京今天往前 8 天，含今天
               day = today - datetime.timedelta(days=back)
               iso, ymd = day.isoformat(), day.strftime("%Y%m%d")
+              if published and iso <= published:
+                  print(f"候选 {iso}: 线上已发到这一期，停止回看")
+                  break
               url = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates=" + ymd
               try:
                   with urllib.request.urlopen(url, timeout=25) as r:
@@ -99,11 +111,11 @@ jobs:
               pending = [e.get("shortName", e.get("name", "?")) for e in evs
                          if not e["competitions"][0].get("status", {}).get("type", {}).get("completed")]
               print(f"候选 {iso}: 共 {len(evs)} 场 / 未终场 {len(pending)} 场")
+              if not evs:
+                  print("  休战日无比赛，不出空战报")
+                  continue
               if pending:
-                  continue                      # 这天还没打完，继续往前看一天
-              if published and iso <= published:
-                  print("线上已是这一期（或更新），不重复出稿")
-                  break
+                  continue
               picked, go = iso, "true"
               break
 
@@ -113,11 +125,23 @@ jobs:
           print("补出 " + picked if go == "true" else "整档跳过，页面保留上一期战报")
           PY
 
+      # 封面图要画中文，需要 Pillow + 一个开源中文字体。
+      # 不能用 Windows 的微软雅黑（微软版权，进不了仓库），也装不到 Ubuntu 上。
+      # 这一步失败不影响出稿 —— cover.py 会自己跳过，战报照常生成。
+      # 只有真要出稿时才装：被 gate 跳过的档不该白跑 apt / pip，省 Actions 额度。
+      - name: 装封面依赖
+        if: steps.gate.outputs.go != 'false'
+        continue-on-error: true
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-wqy-zenhei
+          python -m pip install --quiet --disable-pip-version-check pillow
+
       - name: 生成战报
         if: steps.gate.outputs.go != 'false'
         env:
-          # 定时档用 gate 挑出来的比赛日（可能往前补一天）；手动档用输入框的值，
-          # 留空时 fetch_nba.py 自己取「北京时间昨天」。
+          # 定时档与「手动留空」档都用 gate 挑出来的比赛日（可能往前补几天）；
+          # 手动填了 game_date 时 gate 被跳过，直接用输入框的值。
           REPORT_GAME_DATE: ${{ steps.gate.outputs.game_date || inputs.game_date }}
           BALLDONTLIE_API_KEY: ${{ secrets.BALLDONTLIE_API_KEY }}
         run: |

@@ -80,7 +80,7 @@
   <div class="status">
     <div class="date" id="st-date">读取中…</div>
     <div class="meta" id="st-meta"></div>
-    <div class="warn" id="st-warn">已过 15:40，这一期还不是今天生成的。去仓库 Actions 页手动 Run workflow 一次，或等 16:51 的补拉。</div>
+    <div class="warn" id="st-warn">页面还停在上一期。点 <a id="st-run" href="https://github.com/rizzot23/nba-daily/actions/workflows/daily-report.yml" target="_blank" rel="noopener" style="color:#b45309;font-weight:700;">去 Actions 手动 Run workflow</a>，<code>game_date</code> 留空直接跑，闸门会自动补最近缺的那一期，不用自己算日期。</div>
   </div>
 
   <h2>1 · 主条：完整战报</h2>
@@ -167,14 +167,15 @@
     <div class="hint" style="margin-top:14px;">
       <b>样式乱了</b>：只从浏览器里复制，别把 HTML 源码粘进去。<br>
       <b>找不到群发</b>：个人订阅号每天 1 次群发，在「新的创作 → 图文消息」里发完后点群发，需管理员微信扫码。<br>
-      <b>页面还是上一期</b>：先 Ctrl+F5 强制刷新，再去 Actions 手动 Run workflow 一次。
+      <b>页面还是上一期</b>：先 Ctrl+F5 强制刷新，再点顶部提示里的「去 Actions 手动 Run workflow」。<code>game_date</code> <strong>留空</strong>即可，闸门会自己找最近一个「全部终场且还没发」的比赛日补出，不用手填日期；只有要强制补很早的某一天才填。
     </div>
   </div>
 
   <div class="foot">
     发布台是静态页，不写任何内容，读的是同目录的 latest.json / feature.json / feature.md / report.html。<br>
-    自动档为北京 14:07 / 15:23 / 16:51 / 19:37 四档，都带「比赛日全部终场才出稿」检查；跑完后这一页和战报一起更新。
-    GitHub 定时是尽力而为，偶尔漏投时以本页顶部日期为准，去 Actions 手动 Run workflow 补一次。<br>
+    自动档为北京 14:07 / 15:23 / 16:51 / 17:13 / 18:43 / 19:37 / 20:19 / 21:29 / 22:53 / 23:17 十档，都带「比赛日全部终场才出稿」检查。
+    GitHub 的定时任务实测会迟到 5~7 小时，所以把投递点铺满下午到深夜：任一档补出后，其余档位读到线上已是这一期就自动跳过，不会重复推。<br>
+    万一还是漏了，以本页顶部日期为准：点提示里的链接手动 Run workflow，<code>game_date</code> 留空，闸门会自动补最近缺的那期。<br>
     三篇固定栏目与两套新栏目的规格见本地 <code>公众号运营方案.html</code>。
   </div>
 
