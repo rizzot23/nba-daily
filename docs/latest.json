@@ -1,6 +1,6 @@
 {
   "game_date": "2026-11-08",
-  "generated_at": "2026-11-10T00:11:38+08:00",
+  "generated_at": "2026-11-10T00:14:29+08:00",
   "total_games": 7,
   "rating_scale": [
     "夯",
@@ -192,7 +192,7 @@
       "home": "公牛",
       "away_score": 127,
       "home_score": 121,
-      "label": "今日最惊险",
+      "label": "今日最功亏一篑",
       "rating": {
         "key": "B",
         "name": "人上人",
