@@ -55,13 +55,27 @@
   .tiny { font-size: 12px; color: #8a8790; }
   .foot { margin-top: 34px; font-size: 12px; color: #a09ca5; border-top: 1px solid #e8e5e0; padding-top: 14px; }
   .copied { color: #15803d; font-size: 12px; }
+  /* 三篇固定栏目：左色条对应各自富文本主题（战报橙红 / 英语书卷蓝 / 留洋松绿） */
+  .cols { display: grid; gap: 10px; }
+  .col { background: #fff; border: 1px solid #e8e5e0; border-left: 4px solid #c2410c;
+         border-radius: 5px; padding: 12px 14px; }
+  .col.b { border-left-color: #3f70ab; }
+  .col.c { border-left-color: #1f6b58; }
+  .col h3 { margin: 0 0 4px; font-size: 14px; }
+  .col .cadence { font-size: 11px; color: #8a8790; margin-left: 8px; font-weight: 400; }
+  .col p { margin: 5px 0 0; font-size: 13px; }
+  .col code { background: #f6f4f1; padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+  .swatch { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 5px; }
+  .local { background: #fff8ed; border: 1px solid #f0dfc6; border-radius: 5px;
+           padding: 10px 12px; font-size: 12px; color: #7c5a2c; margin-top: 12px; }
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <h1>球不落 · 发布台</h1>
-  <p class="sub">每天打开这一页就够了。下面的内容都是实时读取线上战报生成的，下午自动换成当天新一期，不用重新发链接。</p>
+  <p class="sub">每天打开这一页就够了。战报内容实时读取线上产物，自动换成当天新一期，不用重新发链接。<br>
+    <strong class="k">一次群发固定 3 篇</strong>：战报头条、每日英语、中国球员留洋追踪（周更，当天没有就不挂）。</p>
 
   <div class="status">
     <div class="date" id="st-date">读取中…</div>
@@ -81,7 +95,8 @@
 
   <h2>2 · 标题与摘要</h2>
   <div class="card">
-    <div class="tiny" style="margin-bottom:8px;">主条标题建议带球队名，微信搜一搜才有自然流量。点右边按钮直接复制。</div>
+    <div class="tiny" style="margin-bottom:8px;">主条标题建议带球队名，微信搜一搜才有自然流量。点右边按钮直接复制。<br>
+      标「备用」的几条来自单场深读提纲，不是三篇固定栏目的标题，用不上就跳过。</div>
     <div id="titles"><span class="tiny">读取中…</span></div>
   </div>
 
@@ -93,12 +108,36 @@
     <div class="hint">公众号后台「封面和摘要」里上传这张；头条号要重新上传，两边不共用。</div>
   </div>
 
-  <h2>4 · 次条素材（可选）</h2>
+  <h2>4 · 三篇固定栏目与素材</h2>
   <div class="card">
-    <a class="btn ghost" href="./feature.md" target="_blank" rel="noopener">打开今日主打提纲</a>
-    <div class="hint">
-      提纲里是标题候选、开场句、正文骨架和可直接引用的数字，不是成品稿。<br>
-      <strong class="k">只有 2 场之类的小日子，建议只发主条一条</strong>，先把流程走顺，别为凑次条硬写 1200 字。
+    <div class="cols">
+      <div class="col">
+        <h3>① 战报头条 <span class="cadence">赛季内日更</span></h3>
+        <p><span class="swatch" style="background:#c2410c;"></span>墨色 + 橙红主题 ·
+          复制源 <a href="./report.html" target="_blank" rel="noopener">report.html</a>（见第 1 节）·
+          封面 <code>cover.png</code>（900×383，头条 2.35:1）</p>
+      </div>
+      <div class="col b">
+        <h3>② 每日英语 <span class="cadence">全年日更，休赛期换 FIBA / 选秀 / 夏联来源</span></h3>
+        <p><span class="swatch" style="background:#3f70ab;"></span>书卷蓝主题 ·
+          复制源 <code>samples/每日英语-*.html</code> ·
+          头图 <code>02-每日英语-800x800.png</code>（次条小图用方图）</p>
+      </div>
+      <div class="col c">
+        <h3>③ 中国球员留洋追踪 <span class="cadence">周更，建议北京周三，最终日子待定</span></h3>
+        <p><span class="swatch" style="background:#1f6b58;"></span>松绿主题 ·
+          复制源 <code>samples/中国球员留洋-样例.html</code> ·
+          头图 <code>03-中国球员留洋-800x800.png</code></p>
+      </div>
+    </div>
+    <div class="local">
+      <b>②③ 两份富文本目前只在本地</b>，还没同步仓库、也没接自动任务：在电脑上用浏览器打开对应 <code>.html</code>，
+      <strong>全选 → 复制 → 粘进公众号编辑器</strong>（样式全是内联的，微信不会过滤）。头图在 <code>brand/covers/</code>，
+      每期复用、不用重画。<strong>本页不放它们的线上链接</strong>，避免点到空地址。
+    </div>
+    <div class="hint" style="margin-top:14px;">
+      <b>单场深读提纲（备用，不占三篇位置）</b>：<a href="./feature.md" target="_blank" rel="noopener">打开今日主打提纲</a>。
+      里面是标题候选、开场句和正文骨架，不是成品稿；它原定位「公众号次条」，次条现在固定给每日英语，新位置还没定，先留作备用素材。
     </div>
   </div>
 
@@ -107,8 +146,8 @@
     <ol>
       <li><b>确认页面顶部日期是今天的比赛日</b>数据没更新就先别发，等自动任务或手动跑一次。</li>
       <li><b>改导语</b>粘贴后把开头那段自动生成的导语换成你自己的一句话判断。这是唯一不能自动化、也最值得花时间的部分。</li>
-      <li><b>建多图文、粘正文、传封面</b>群发页选「图文消息」，左上角「+」可加第二条。第一条是主条。</li>
-      <li><b>填标题、摘要，核对图片</b>往下翻一遍，确认 14 张走势图都在；文末免责声明已自带，别删。</li>
+      <li><b>建多图文、依次粘三篇、各传各的头图</b>群发页选「图文消息」，左上角「+」加第二、第三条。第一条必须是战报；周报当天不发时只挂两篇。头图用 800×800 方图，微信按 1:1 裁不会切掉栏目名。</li>
+      <li><b>填标题、摘要，核对图片</b>往下翻一遍，确认主条的走势图都在（张数随当天场次变，不是固定的 14 张）；文末免责声明已自带，别删。三篇各一套配色是刻意分的，别把某一篇刷成另一篇的颜色。</li>
       <li><b>点「群发」，用管理员微信扫码</b><span style="color:#b91c1c;">不是「发布」</span>：「发布」只进主页、不推送、不占次数，很多人以为发出去了，其实没人收到。</li>
     </ol>
   </div>
@@ -134,7 +173,9 @@
 
   <div class="foot">
     发布台是静态页，不写任何内容，读的是同目录的 latest.json / feature.json / feature.md / report.html。<br>
-    定时任务（北京 15:23 首拉、16:51 补拉）跑完后，这一页和战报会一起更新。
+    自动档为北京 14:07 / 15:23 / 16:51 / 19:37 四档，都带「比赛日全部终场才出稿」检查；跑完后这一页和战报一起更新。
+    GitHub 定时是尽力而为，偶尔漏投时以本页顶部日期为准，去 Actions 手动 Run workflow 补一次。<br>
+    三篇固定栏目与两套新栏目的规格见本地 <code>公众号运营方案.html</code>。
   </div>
 
 </div>
@@ -223,7 +264,8 @@ function addTitleRow(label, value) {
           .slice(0, 3)
           .map(l => l.replace(/^\s*\d+\.\s*/, '').replace(/（\d+\s*字）\s*$/, '').trim());
       };
-      group('**公众号次条**').forEach((t, i) => addTitleRow('次条候选 ' + (i + 1), t));
+      // feature.md 里的分组标记仍是「公众号次条」，产物没改；这里只把展示名标成备用
+      group('**公众号次条**').forEach((t, i) => addTitleRow('备用候选 ' + (i + 1), t));
       group('**头条号**').forEach((t, i) => addTitleRow('头条号候选 ' + (i + 1), t));
     } catch (e) {}
     if (!$('titles').children.length) $('titles').innerHTML = '<span class="tiny">提纲读取失败，直接打开 feature.md 查看。</span>';
