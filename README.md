@@ -290,6 +290,7 @@ GitHub Actions 的出口是 Azure 的动态地址段，几百个 IP 且共享。
 - 每场扫 `article.headline` / `description` / `story` 三段，各自切句再合并 —— headline 多数不带句号，直接拼会把标题和导语粘成超长句，正则会跨段误匹配。
 - 中文要点里的每个数字都取自原句；「近年最长连胜」这类句子里的**当前连胜数只从 headline 的 `win seventh straight` 读**，正文 `seven in a row from March 2025` 是拿来对比的旧纪录，换一天就会写错。
 - 「纪录被终结」（`ended` / `snapped` / `broken`）不收：那不是当天破纪录，放在这个标题下会误导。
+- **只收当天发生的事（2026-11-10 补）**：ESPN 正文常顺带回顾旧纪录，`Davis, who set … with a career-high 59 points for the Pelicans in 2016`（十年前在鹈鹕）、`Jenkins scored a career-high 31 points in Sunday's loss to the Lakers`（前一天）都不是这一天破的。带具体得分数字的个人纪录要同时过两道闸：句子不带历史回顾信号（星期几's / 年份 / `who set` 等），且这个分数在本场 boxscore 里真有人拿到；否则整条丢弃，绝不能挂到当天比分下面和焦点球星的真实数据打架。球队类连胜 / 连败口径不受影响，正文里的 `from March 2025` 是合法对比，别误杀。
 - 认不出的句子直接跳过，**绝不硬凑**；命中句里的人名按「完整名优先、出现位置最靠前」匹配，代词开头的句子才回退到 headline 找主角，避免把队友名字安到别人头上。
 
 `latest.json` 顶层多了 `records`，每条含 `cn`（中文要点）、`who`（球星主体）、`team`（球队主体）、`kind`（球星 / 球队）、`game`、`source`（英文原句），方便逐条复核。11-07 实测抽出 7 条：库里 35 岁后第 16 次 40+ 分 NBA 历史最多、雷霆把奇才压到本赛季全联盟单场最低分、勇士开季 0-3 后 7 连胜、布克生涯第 745 场升至太阳队史第 3、夏普生涯首个三双、太阳赛季首次连胜、杨瀚森生涯首个两双。

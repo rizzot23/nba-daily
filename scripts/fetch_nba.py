@@ -1275,6 +1275,22 @@ def _clean_text(raw):
     return re.sub(r"\s+", " ", s).strip()
 
 
+# ESPN 战报爱顺带回顾球员旧事，例如 11-09 奇才 @ 活塞那篇：
+#   "Jenkins scored a career-high 31 points in Sunday's loss to the Lakers"（昨天）
+#   "Davis, who set ... with a career-high 59 points for the Pelicans in 2016"（十年前）
+# 这些都不是当天破的纪录，却被旧版正则当成「今日破纪录」挂到本场比分下面，
+# 和焦点球星的真实 44 分直接打架。只给带具体得分数字的个人纪录加这道闸门，
+# 球队类连胜 / 连败口径不动（正文里的 "from March 2025" 是合法对比，不能误杀）。
+_RETRO_HINT = re.compile(
+    r"\b(?:sunday|monday|tuesday|wednesday|thursday|friday|saturday)'s\b"
+    r"|\bin (?:19|20)\d{2}\b"
+    r"|\b(?:last|previous) (?:season|year|game|week|month)\b"
+    r"|\bback in\b|\bpreviously\b|\bmost since\b|\bsince (?:19|20)\d{2}\b"
+    r"|\bwho (?:set|scored|had|made)\b",
+    re.I,
+)
+
+
 def _team_cn(nick):
     """Warriors / Rockets / Blazers 这类队名尾巴转中文，认不出就留空。"""
     nick = str(nick or "").lower()
@@ -1362,20 +1378,23 @@ def _record_team(sentence, game):
     return cn_team(game[win]["name_en"], TEAM_MAP)
 
 
-def _record_cn(sentence, headline=""):
+def _record_cn(sentence, headline="", points_today=None):
     """一句英文战报 -> (稀罕度, 类型, 中文要点)。认不出返回 None，绝不硬凑。
 
     稀罕度越小越罕，只用来排显示顺序；中文要点里的每个数字都取自原句。
     headline 只在正文提到「近年最长连胜」时用来读当前连胜数 —— 正文里的
     "seven in a row from March 2025" 说的是去年那波旧纪录，不是这一波。
+    points_today 是本场 boxscore 里现成的得分集合，只用来判断「这个分数
+    今天有没有人真拿到」，不做任何纪录计算。
     """
     low = sentence.lower()
+    retro = bool(_RETRO_HINT.search(low))
 
     m = re.search(
         r"(\d+)(?:st|nd|rd|th)\s+(\d+)-point\s+(?:effort|game)\s+"
         r"after age\s+(\d+),\s*most in nba history", low,
     )
-    if m:
+    if m and not retro:
         return (0, "球星", f"{m.group(3)} 岁后第 {m.group(1)} 次 {m.group(2)}+ 分，NBA 历史最多")
 
     m = re.search(r"nba-record run of ([\d,]+) consecutive", low)
@@ -1391,14 +1410,19 @@ def _record_cn(sentence, headline=""):
 
     m = re.search(r"career[- ]high\s+(\d+)\s+points", low)
     if m:
-        return (1, "球星", f"生涯新高 {m.group(1)} 分")
+        n = int(m.group(1))
+        # 双保险：句子不能是回顾旧事，且这个分数必须是本场有人真拿到的。
+        # 11-09 那篇正文里的 59 分（2016 年鹈鹕时期）和 31 分（前一天对湖人）
+        # 都不在当天 boxscore 里，直接丢弃，不再挂到「奇才 111-122 活塞」下面。
+        if not retro and (points_today is None or n in points_today):
+            return (1, "球星", f"生涯新高 {n} 分")
 
     m = re.search(r"(\d+)(?:st|nd|rd|th) career (\d+)-point game", low)
-    if m:
+    if m and not retro:
         return (1, "球星", f"生涯第 {m.group(1)} 次 {m.group(2)}+ 分")
 
     m = re.search(r"(\w+) consecutive games with at least (\d+) points", low)
-    if m:
+    if m and not retro:
         n = _word_num(m.group(1)) or m.group(1)
         return (1, "球星", f"连续 {n} 场 {m.group(2)}+ 分")
 
@@ -1477,11 +1501,18 @@ def build_records(games):
             f'{g["away"]["score"]}-{g["home"]["score"]} '
             f'{cn_team(g["home"]["name_en"], TEAM_MAP)}'
         )
+        # 本场所有球员的实际得分（现成 boxscore），用来挡掉正文里的历史回顾。
+        pts_today = set()
+        for p in g.get("roster") or []:
+            try:
+                pts_today.add(int(str(p.get("pts") or "").strip()))
+            except (ValueError, TypeError):
+                continue
         # 先收全场命中，按稀罕度排完再取名额：否则正文里先出现的
         # 「赛季首次连胜」会把后面更有料的「升至队史第 3」挤掉。
         hits = []
         for sent in sents:
-            hit = _record_cn(sent, headline)
+            hit = _record_cn(sent, headline, pts_today)
             if not hit:
                 continue
             rank, kind, cn = hit
