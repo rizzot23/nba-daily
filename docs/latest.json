@@ -1,6 +1,6 @@
 {
   "game_date": "2026-11-09",
-  "generated_at": "2026-11-10T20:58:32+08:00",
+  "generated_at": "2026-11-10T21:22:50+08:00",
   "total_games": 8,
   "rating_scale": [
     "夯",
@@ -114,22 +114,6 @@
     }
   ],
   "records": [
-    {
-      "cn": "生涯新高 31 分",
-      "who": "詹金斯",
-      "team": "",
-      "kind": "球星",
-      "game": "奇才 111-122 活塞",
-      "source": "Jenkins scored a career-high 31 points in Sunday's loss to the Los Angeles Lakers ."
-    },
-    {
-      "cn": "生涯新高 59 分",
-      "who": "安东尼·戴维斯",
-      "team": "",
-      "kind": "球星",
-      "game": "奇才 111-122 活塞",
-      "source": "Davis, who set the scoring record at the Palace of Auburn Hills with a career-high 59 points for the Pelicans in 2016, started the game like he was headed toward breaking Anthony Edwards ' Little Caesars Arena record of "
-    },
     {
       "cn": "终结3 连败",
       "who": "",
