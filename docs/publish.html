@@ -174,8 +174,8 @@
   <div class="foot">
     发布台是静态页，不写任何内容，读的是同目录的 latest.json / feature.json / feature.md / report.html。<br>
     自动档为北京 14:07 / 15:23 / 16:51 / 17:13 / 18:43 / 19:37 / 20:19 / 21:29 / 22:53 / 23:17 十档，都带「比赛日全部终场才出稿」检查。
-    GitHub 的定时任务实测会迟到 5~7 小时，所以把投递点铺满下午到深夜：任一档补出后，其余档位读到线上已是这一期就自动跳过，不会重复推。<br>
-    万一还是漏了，以本页顶部日期为准：点提示里的链接手动 Run workflow，<code>game_date</code> 留空，闸门会自动补最近缺的那期。<br>
+    GitHub 的定时是「尽力而为」，实测这个仓库每天只批量投递 4~5 次、窗口逐日后移，<b>不能当每天必出的保证</b>；任一档补出后，其余档读到线上已是这一期就自动跳过，不会重复推。<br>
+    顶部日期不对时：点提示里的链接手动 Run workflow，<code>game_date</code> 留空；或在电脑上运行 <code>python scripts/catchup.py</code>、双击 <code>catchup.bat</code> 一键补跑，闸门会自动补最近缺的那期。<br>
     三篇固定栏目与两套新栏目的规格见本地 <code>公众号运营方案.html</code>。
   </div>
 
