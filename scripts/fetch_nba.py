@@ -869,6 +869,14 @@ def pick_headline(played):
     不是交替领先多几次。11-07 勇士加时、激烈度 151，火箭没加时、201.9，
     加时加成让勇士 211 上位 —— 结局咬得紧又多打一节，比全程来回更值得放头条。
     两种加成可叠加：加时绝杀本来就是当天最不可替代的那场。
+
+    11-11 补一道「结局闸门」：过程分最高的那场若「最后赢两位数 + 末节没咬住 +
+    无绝杀无加时」，不能当头条。11-10 雷霆 103-123 开拓者前三节交替领先 14 次、
+    打平 14 次，过程分 103 断层第一，但末节 21-38 被一波带走、胶着 0 秒、赢 20 分，
+    评级只有「拉」；让它占着导语 / 封面 / 次条选题 / 推荐区首张，会和
+    「结局与末节最重要」的口径打架，当天两场「人上人」反而被挤到其余场次。
+    按 rank 往下找第一个收尾合格的；全场都不合格时仍返回 rank 最高那场 ——
+    封面和导语总得有一场可写。徽章「今日最胶着」仍按过程分单独发，不跟着换。
     """
     if not played:
         return None
@@ -880,7 +888,17 @@ def pick_headline(played):
         dr = g["drama"]
         return dr["score"] + (60 if dr.get("clutch") else 0) + (60 if overtimes(g) else 0)
 
-    return max(scored, key=rank)
+    def ending_ok(g):
+        """结局还咬得住：没在中段来回完之后把比赛打花。"""
+        dr = g["drama"] or {}
+        if dr.get("clutch") or overtimes(g):
+            return True
+        margin = abs(g["home"]["score"] - g["away"]["score"])
+        close = dr.get("close_seconds") or 0
+        return not (margin >= 10 and close <= 60)
+
+    ranked = sorted(scored, key=rank, reverse=True)
+    return next((g for g in ranked if ending_ok(g)), ranked[0])
 
 
 LABELS = {
@@ -1878,7 +1896,20 @@ def pick_watchable(played, skip_id=None):
         if not margin:
             continue
         if not watch_ok(g, margin):
-            continue
+            # 11-11 补：评级到「人上人」及以上的场次也进推荐区。
+            # 11-10 全场 0 场过 watch_ok，标题场（评级「拉」）孤零零占着
+            # 「推荐比赛」，两场「人上人」反被留在「其余」——观感倒挂。
+            # 评级走「结局与末节」口径、准入走「过程够硬」口径，两条都算数，
+            # 但不在 watch_ok() 里放水：夯 / 顶级仍只认原来那几条硬门槛。
+            if (rate_game(g).get("key") or "C") not in ("S", "A", "B"):
+                continue
+            dr = g.get("drama") or {}
+            if ((dr.get("comeback") or 0) >= 12 and margin >= 10
+                    and (dr.get("close_seconds") or 0) <= 60):
+                # 11-08 凯尔特人 117-97 雄鹿那类：两位数翻盘但末节 0 秒胶着、
+                # 最后赢 20 分。当初给它封顶「人上人」是为了不让它从「顶级」
+                # 一路摔到「拉完了」，不是又把它请回推荐区。别改回去。
+                continue
         picks.append((g, margin))
     picks.sort(key=lambda x: watch_rank(x[0]), reverse=True)
     return [(g, watch_reason(g, m)) for g, m in picks[:WATCH_MAX]]
