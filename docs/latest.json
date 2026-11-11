@@ -1,6 +1,6 @@
 {
   "game_date": "2026-11-10",
-  "generated_at": "2026-11-11T22:05:20+08:00",
+  "generated_at": "2026-11-11T22:30:46+08:00",
   "total_games": 6,
   "rating_scale": [
     "夯",
@@ -19,8 +19,8 @@
     "拉完了": 3
   },
   "postseason": false,
-  "headline": "雷霆 103-123 开拓者",
-  "lead": "今天 6 场，最胶着的是雷霆 103-123 开拓者：交替领先 14 次，打平 14 次。",
+  "headline": "魔术 107-100 国王",
+  "lead": "今天 6 场，最值得看的是魔术 107-100 国王：交替领先 5 次，打平 4 次，最后 0:21 分差还在 5 分以内。",
   "focus": [
     {
       "cn": "詹姆斯",
@@ -93,13 +93,13 @@
   "records": [],
   "cover": {
     "date": "2026年11月10日",
-    "away": "雷霆",
-    "away_score": 103,
-    "away_color": "007ac1",
-    "home": "开拓者",
-    "home_score": 123,
-    "home_color": "e03a3e",
-    "footer": "全联盟 6 场|今日最胶着"
+    "away": "魔术",
+    "away_score": 107,
+    "away_color": "0150b5",
+    "home": "国王",
+    "home_score": 100,
+    "home_color": "5a2d81",
+    "footer": "全联盟 6 场"
   },
   "best_action": {
     "player": "凯尔·韦尔",
